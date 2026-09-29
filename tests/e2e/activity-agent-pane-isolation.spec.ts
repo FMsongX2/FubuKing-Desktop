@@ -32,7 +32,7 @@ type SplitGroupTerminal = {
 }
 
 function agentsSidebarButton(page: Page) {
-  return page.getByRole('button', { name: 'View activity', exact: true })
+  return page.getByRole('button', { name: 'Show sessions', exact: true })
 }
 
 async function seedActivityThread(
@@ -252,7 +252,7 @@ test.describe('Activity Agent Pane Isolation', () => {
       })
 
     await expect(
-      orcaPage.getByRole('button', { name: 'Turn off activity view', exact: true })
+      orcaPage.getByRole('button', { name: 'Show workspaces', exact: true })
     ).toHaveAttribute('aria-pressed', 'true')
     await orcaPage.getByRole('button').filter({ hasText: second.prompt }).first().click()
     await expect

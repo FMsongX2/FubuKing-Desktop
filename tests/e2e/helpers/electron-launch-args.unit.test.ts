@@ -51,7 +51,9 @@ describe('getOrcaElectronLaunchArgs', () => {
         '--use-mock-keychain',
         root,
         '-ApplePersistenceIgnoreState',
-        'YES'
+        'YES',
+        '-AppleLanguages',
+        '(en)'
       ])
     } else {
       expect(args.at(-1)).toBe(root)

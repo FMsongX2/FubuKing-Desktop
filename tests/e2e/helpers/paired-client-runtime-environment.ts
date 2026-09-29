@@ -1,6 +1,7 @@
 import type { Page } from '@stablyai/playwright-test'
 import type { PairedElectronClient, RuntimeDesktopPairingOffer } from './paired-electron-client'
 import { revealPairedClientWindow } from './paired-client-window-reveal'
+import { showWorktreeList } from './store'
 
 /**
  * Points a freshly launched paired desktop client at the HUB runtime and makes it the active
@@ -90,6 +91,7 @@ export async function rePairPairedElectronClient(
     null,
     { timeout: 30_000, polling: 100 }
   )
+  await showWorktreeList(client.page)
   await client.installDirectSshAttemptProbe()
   const reachable = await client.page.evaluate(async (nextEnvironmentId) => {
     const store = window.__store

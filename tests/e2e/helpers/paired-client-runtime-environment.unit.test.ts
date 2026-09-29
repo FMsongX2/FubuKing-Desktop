@@ -23,7 +23,8 @@ function fixture(canSelectLocal: boolean) {
       return true
     }),
     setRuntimeEnvironments: vi.fn(),
-    refreshRuntimeEnvironmentStatus: vi.fn(async () => true)
+    refreshRuntimeEnvironmentStatus: vi.fn(async () => true),
+    setSidebarBody: vi.fn()
   }
   vi.stubGlobal('window', {
     __store: { getState: () => state },
@@ -48,7 +49,7 @@ function fixture(canSelectLocal: boolean) {
       waitForFunction: vi.fn(async () => undefined)
     }
   } as unknown as PairedElectronClient
-  return { client, remove, reload, nativeEvaluate }
+  return { client, remove, reload, nativeEvaluate, state }
 }
 
 it('keeps the old pairing when selecting local fails', async () => {
@@ -65,10 +66,12 @@ it('replaces the active pairing without touching native windows in background mo
   vi.stubEnv('ORCA_BACKGROUND_LAUNCH', '1')
   vi.stubEnv('GITHUB_ACTIONS', 'true')
   vi.stubEnv('DISPLAY', ':99')
-  const { client, remove, reload, nativeEvaluate } = fixture(true)
+  const { client, remove, reload, nativeEvaluate, state } = fixture(true)
   await rePairPairedElectronClient(client, { pairingUrl: 'code' }, 'HUB')
   expect(remove).toHaveBeenCalledWith({ selector: 'old-hub' })
   expect(client.environmentId).toBe('new-hub')
   expect(reload).toHaveBeenCalledOnce()
   expect(nativeEvaluate).not.toHaveBeenCalled()
+  // The reload remounts the fork's default sessions list; specs here drive the worktree list.
+  expect(state.setSidebarBody).toHaveBeenCalledWith('workspaces')
 })

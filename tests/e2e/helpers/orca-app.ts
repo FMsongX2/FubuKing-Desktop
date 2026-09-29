@@ -21,11 +21,15 @@ import {
   type ElectronApplication,
   type TestInfo
 } from '@stablyai/playwright-test'
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { TEST_REPO_PATH_FILE } from '../global-setup'
-import { cleanupE2EDaemons, closeElectronAppForE2E } from './electron-process-shutdown'
+import {
+  cleanupE2EDaemons,
+  closeElectronAppForE2E,
+  removeUserDataDirAfterShutdown
+} from './electron-process-shutdown'
 import { getOrcaElectronLaunchArgs } from './electron-launch-args'
 import { retryTransientMainEvaluate } from './electron-main-evaluate-retry'
 import { getE2ECompletedOnboardingProfile } from './e2e-completed-onboarding-profile'
@@ -34,6 +38,7 @@ import {
   createElectronHomeIsolation
 } from './electron-home-isolation'
 import { createSeededTestRepo, isValidGitRepo } from './seeded-test-repo'
+import { showWorktreeList } from './store'
 
 type OrcaTestFixtures = {
   electronApp: ElectronApplication
@@ -45,6 +50,10 @@ type OrcaTestFixtures = {
   // events for every other test. Dismiss it by default; onboarding.spec.ts
   // opts out via `test.use({ dismissOnboarding: false })`.
   dismissOnboarding: boolean
+  // Why: this fork opens on the sessions list, with Chat as the agent view. Specs inherited from
+  // Orca drive the worktree list and terminal-first agent tabs, so by default the profile keeps
+  // Orca's UI defaults and the fixture shows the worktree list. Fork specs opt out.
+  upstreamUiDefaults: boolean
   // Why: most E2E specs need a ready project before assertions start. Golden
   // first-run specs opt out so they can prove the zero-project onboarding path.
   seedTestRepo: boolean
@@ -86,22 +95,6 @@ const ORCA_E2E_SLOWMO_MS = ((): number => {
   }
   return Math.max(parsed, 0)
 })()
-
-async function removeUserDataDirAfterShutdown(userDataDir: string): Promise<void> {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    try {
-      rmSync(userDataDir, { recursive: true, force: true })
-      return
-    } catch (error) {
-      if (attempt === 4) {
-        throw error
-      }
-      // Why: Windows can briefly keep Electron profile files locked after the
-      // process exits; retrying avoids turning a passed flow into teardown noise.
-      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)))
-    }
-  }
-}
 
 function shouldLaunchHeadful(testInfo: TestInfo): boolean {
   // Why: ORCA_E2E_FORCE_HEADFUL lets a developer watch any spec in a real
@@ -176,6 +169,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
   electronApp: async (
     {
       dismissOnboarding,
+      upstreamUiDefaults,
       launchEnv,
       orcaAppExtraEnv,
       orcaAppExtraArgs,
@@ -198,7 +192,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
       // existing-user upgrade cohort and mount the telemetry notice overlay.
       writeFileSync(
         path.join(userDataDir, 'orca-data.json'),
-        `${JSON.stringify(getE2ECompletedOnboardingProfile(), null, 2)}\n`
+        `${JSON.stringify(getE2ECompletedOnboardingProfile({ upstreamUiDefaults }), null, 2)}\n`
       )
     }
     const headful = shouldLaunchHeadful(testInfo)
@@ -278,6 +272,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
 
   // Default: dismiss the onboarding overlay so it doesn't intercept clicks.
   dismissOnboarding: [true, { option: true }],
+  upstreamUiDefaults: [true, { option: true }],
   seedTestRepo: [true, { option: true }],
   // Test-scoped so generation scenarios can isolate Git indexes and remotes.
   seededRepoPath: async ({ testRepoPath }, provideFixture) => {
@@ -291,7 +286,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
   // Test-scoped: grab the first BrowserWindow, add the test repo, and wait
   // until the session is fully ready with a worktree active.
   sharedPage: async (
-    { electronApp, minimumSeededWorktreeCount, seedTestRepo, seededRepoPath },
+    { electronApp, minimumSeededWorktreeCount, seedTestRepo, seededRepoPath, upstreamUiDefaults },
     provideFixture
   ) => {
     // Why: the Electron app may take a while to create the first window,
@@ -309,6 +304,9 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
         null,
         { timeout: 30_000 }
       )
+      if (upstreamUiDefaults) {
+        await showWorktreeList(page)
+      }
       await provideFixture(page)
       return
     }
@@ -446,6 +444,9 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
       }
     })
 
+    if (upstreamUiDefaults) {
+      await showWorktreeList(page)
+    }
     await provideFixture(page)
   },
 

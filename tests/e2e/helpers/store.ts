@@ -144,6 +144,16 @@ export async function getOpenFiles(
   }, worktreeId)
 }
 
+/**
+ * Show the worktree list in the left sidebar.
+ *
+ * Why: this fork opens on the sessions list, and specs inherited from Orca drive worktree
+ * cards. The sidebar body is not persisted, so every relaunch, reload and new client needs this.
+ */
+export async function showWorktreeList(page: Page): Promise<void> {
+  await page.evaluate(() => window.__store?.getState().setSidebarBody('workspaces'))
+}
+
 /** Wait until the workspace session is ready. Uses expect.poll for proper Playwright waiting. */
 export async function waitForSessionReady(page: Page, timeoutMs = 30_000): Promise<void> {
   await expect

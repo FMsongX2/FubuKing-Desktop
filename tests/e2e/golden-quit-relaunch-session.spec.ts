@@ -3,7 +3,7 @@ import type { ElectronApplication } from '@stablyai/playwright-test'
 import { expect, test } from './helpers/orca-app'
 import { openFileExplorer } from './helpers/file-explorer'
 import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/orca-restart'
-import { ensureTerminalVisible, waitForSessionReady } from './helpers/store'
+import { ensureTerminalVisible, showWorktreeList, waitForSessionReady } from './helpers/store'
 import { createTerminalTabFromMenu, SORTABLE_TAB } from './helpers/terminal-tab-menu'
 import {
   execInTerminal,
@@ -73,6 +73,7 @@ test('restores the exact file and live extra terminal after quit and relaunch @g
     const second = await session.launch()
     secondApp = second.app
     await waitForSessionReady(second.page)
+    await showWorktreeList(second.page)
     await expect(
       second.page.locator(`[role="option"][data-worktree-id="${primaryWorktreeId}"]`)
     ).toHaveAttribute('aria-current', 'page', { timeout: 30_000 })

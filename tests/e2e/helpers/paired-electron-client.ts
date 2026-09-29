@@ -24,6 +24,7 @@ import {
 } from './nested-runtime-same-id-pairing'
 import { createPairedWebClientUrl, type PairedWebClientOptions } from './paired-web-client-url'
 import { selectPairedRuntimeEnvironment } from './paired-client-runtime-environment'
+import { showWorktreeList } from './store'
 
 export { rePairPairedElectronClient } from './paired-client-runtime-environment'
 
@@ -142,6 +143,8 @@ export async function launchPairedWebClient(
     )
     page = await pagePromise
     if (options.waitForWorkspace !== false) {
+      await page.waitForFunction(() => Boolean(window.__store), null, { timeout: 30_000 })
+      await showWorktreeList(page)
       await page.locator('[data-worktree-sidebar]').waitFor({ state: 'visible', timeout: 30_000 })
     }
     return { page, dispose: () => page?.close() ?? Promise.resolve() }
@@ -207,6 +210,7 @@ export async function launchPairedElectronClient(
       null,
       { timeout: 30_000 }
     )
+    await showWorktreeList(page)
     const canaryBlocked = await page.evaluate(async (targetId) => {
       try {
         await window.api.ssh.connect({ targetId })

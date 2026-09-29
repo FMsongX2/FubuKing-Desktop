@@ -8,7 +8,12 @@ import type { ElectronApplication, Page } from '@stablyai/playwright-test'
 import { test, expect } from './helpers/orca-app'
 import { TEST_REPO_PATH_FILE } from './global-setup'
 import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/orca-restart'
-import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
+import {
+  ensureTerminalVisible,
+  showWorktreeList,
+  waitForActiveWorktree,
+  waitForSessionReady
+} from './helpers/store'
 import {
   waitForActivePaneHookDescriptor,
   waitForActivePanePtyId,
@@ -325,6 +330,7 @@ for (const daemonSessionGone of [false, true]) {
       const second = await session.launch()
       secondApp = second.app
       await waitForSessionReady(second.page)
+      await showWorktreeList(second.page)
       if (!daemonSessionGone) {
         // The restarted runtime must rediscover the daemon-owned worker before reveal.
         await expect

@@ -1,5 +1,10 @@
 import { test as base, expect } from './helpers/orca-app'
-import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
+import {
+  ensureTerminalVisible,
+  showWorktreeList,
+  waitForActiveWorktree,
+  waitForSessionReady
+} from './helpers/store'
 import {
   waitForActivePaneHookDescriptor,
   waitForActivePanePtyId,
@@ -408,6 +413,7 @@ for (const closeMode of ['terminal-close-cli', 'worker-release'] as const) {
 
     await orcaPage.reload()
     await waitForSessionReady(orcaPage)
+    await showWorktreeList(orcaPage)
 
     const beforeActivation = await orcaPage.evaluate((worktreeId) => {
       const state = window.__store?.getState()

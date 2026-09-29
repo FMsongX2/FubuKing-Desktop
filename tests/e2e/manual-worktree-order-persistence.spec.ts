@@ -1,7 +1,7 @@
 import { expect, test } from './helpers/orca-app'
 import type { Page } from '@stablyai/playwright-test'
 import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/orca-restart'
-import { waitForSessionReady } from './helpers/store'
+import { showWorktreeList, waitForSessionReady } from './helpers/store'
 
 async function visibleWorktreeIds(page: Page): Promise<string[]> {
   return page
@@ -46,6 +46,7 @@ test('manual drag survives activity and persisted-profile reload', async ({
     const first = await session.launch()
     firstApp = first.app
     await waitForSessionReady(first.page)
+    await showWorktreeList(first.page)
     await attachRepoAndOpenTerminal(first.page, testRepoPath)
     createdIds = await first.page.evaluate(async () => {
       const store = window.__store
@@ -179,6 +180,7 @@ test('manual drag survives activity and persisted-profile reload', async ({
     const second = await session.launch()
     secondApp = second.app
     await waitForSessionReady(second.page)
+    await showWorktreeList(second.page)
     const reloadedState = await second.page.evaluate((ids) => {
       const state = window.__store?.getState()
       if (!state) {
