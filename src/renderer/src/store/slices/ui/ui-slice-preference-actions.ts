@@ -40,7 +40,8 @@ import {
 
 export function createUiPreferenceActions(set: UISliceSet, get: UISliceGet): Partial<UISlice> {
   return {
-    sidebarBody: 'workspaces',
+    // Why agents: the sessions list is this fork's home sidebar; workspaces stay one toggle away.
+    sidebarBody: 'agents',
     setSidebarBody: (body) => set({ sidebarBody: body }),
 
     groupBy: 'repo',

@@ -98,7 +98,8 @@ export function SidebarHeaderActions({
           <AddProjectButton preserveWorkspaceBoardOpen />
         </>
       )}
-      <NewWorkspaceButton preserveWorkspaceBoardOpen />
+      {/* Why hidden in the agents view: the sessions list opens with its own New session row. */}
+      {agentsViewActive ? null : <NewWorkspaceButton preserveWorkspaceBoardOpen />}
     </div>
   )
 }

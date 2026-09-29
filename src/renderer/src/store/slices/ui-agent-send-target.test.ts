@@ -152,6 +152,7 @@ describe('createUISlice agent send target mode', () => {
   it('opens target mode with derived eligible and disabled pane keys', () => {
     const store = createUIStore()
     seedAgentSendState(store)
+    store.getState().setSidebarBody('agents')
 
     store.getState().openAgentSendPopoverTargetMode({
       id: 'send-1',
@@ -173,6 +174,8 @@ describe('createUISlice agent send target mode', () => {
       behavior: 'auto',
       highlight: true
     })
+    // Targets are picked on worktree cards, so target mode leaves the sessions list.
+    expect(store.getState().sidebarBody).toBe('workspaces')
   })
 
   it('disables sidebar target rows that need permission', async () => {

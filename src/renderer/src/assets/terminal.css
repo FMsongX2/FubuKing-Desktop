@@ -467,6 +467,38 @@
   color: var(--orca-pane-title-button-hover-fg, rgb(255 255 255 / 0.8));
 }
 
+/* Chat | Terminal tabs of an agent pane: peers of the split trigger that keep their labels,
+   with the shown view marked by aria-pressed. */
+.pane-title-view-tabs [data-slot='button'] {
+  color: var(--orca-pane-title-button-fg, rgb(255 255 255 / 0.3));
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    color 120ms ease;
+}
+
+.pane-title-bar[data-active-pane] .pane-title-view-tabs [data-slot='button'],
+.pane-title-bar:hover .pane-title-view-tabs [data-slot='button'],
+.pane-title-bar:focus-within .pane-title-view-tabs [data-slot='button'] {
+  opacity: 1;
+}
+
+.pane-title-view-tabs [data-slot='button']:hover,
+.pane-title-view-tabs [data-slot='button'][aria-pressed='true'] {
+  background: color-mix(
+    in srgb,
+    var(--orca-pane-title-button-hover-fg, rgb(255 255 255 / 0.8)) 12%,
+    transparent
+  );
+  color: var(--orca-pane-title-button-hover-fg, rgb(255 255 255 / 0.8));
+}
+
+/* Why a backing: a chromeless bar floats over the first row of the view below. */
+.pane-title-bar[data-chromeless] .pane-title-view-tabs {
+  background: var(--orca-pane-title-bg, var(--background));
+  border-radius: var(--radius-md);
+}
+
 /* Inline edit input — matches the title text styling exactly to prevent
    layout shift. A subtle bottom border indicates active edit mode. */
 /* When inline-editing, remove the bar's side padding so the input

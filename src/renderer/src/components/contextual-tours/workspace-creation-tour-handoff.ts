@@ -1,7 +1,10 @@
 import { useAppStore } from '@/store'
 import { requestContextualTourWhenReady } from './request-contextual-tour-when-ready'
 
-export function openWorkspaceCreationComposerWithTourHandoff(): void {
+// asSession: opened from a New session control, so the composer is labeled as starting a session.
+export function openWorkspaceCreationComposerWithTourHandoff(options?: {
+  asSession?: boolean
+}): void {
   const state = useAppStore.getState()
   const hasProjects = state.repos.length > 0
 
@@ -20,6 +23,7 @@ export function openWorkspaceCreationComposerWithTourHandoff(): void {
 
   state.openModal('new-workspace-composer', {
     telemetrySource: 'sidebar',
+    ...(options?.asSession ? { asSession: true } : {}),
     ...(shouldHandoffFromAgentSessionsTour
       ? { contextualTourSource: 'workspace_creation_modal' }
       : {})

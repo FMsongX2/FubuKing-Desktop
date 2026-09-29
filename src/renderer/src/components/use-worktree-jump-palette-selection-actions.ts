@@ -207,7 +207,12 @@ export function useWorktreeJumpPaletteSelectionActions({
   const handleSelectProjectTarget = useCallback(
     (result: CmdJProjectSearchResult) => {
       skipRestoreFocusRef.current = true
-      revealSidebarRow(result.rowKey, { behavior: 'smooth', highlight: true })
+      // Why switchFromAgentsBody: revealing the project row is all this selection does.
+      revealSidebarRow(result.rowKey, {
+        behavior: 'smooth',
+        highlight: true,
+        switchFromAgentsBody: true
+      })
       recordFeatureInteraction('cmd-j')
       closeModal()
       setSelectedItemId('')

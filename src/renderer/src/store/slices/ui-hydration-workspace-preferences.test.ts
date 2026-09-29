@@ -561,7 +561,7 @@ describe('createUISlice hydratePersistedUI', () => {
     expect(store.getState().agentsCompactMode).toBe(true)
     expect(store.getState().agentsShowSearch).toBe(true)
     expect(store.getState().agentsReadFilter).toBe('all')
-    expect(store.getState().agentsGroupBy).toBe('status')
+    expect(store.getState().agentsGroupBy).toBe('project')
   })
 
   it('restores a hidden agents search field', () => {
@@ -588,7 +588,7 @@ describe('createUISlice hydratePersistedUI', () => {
       })
     )
     expect(store.getState().agentsReadFilter).toBe('all')
-    expect(store.getState().agentsGroupBy).toBe('status')
+    expect(store.getState().agentsGroupBy).toBe('project')
   })
 
   it('sanitizes malformed agents repo filters before the repo catalog loads', () => {

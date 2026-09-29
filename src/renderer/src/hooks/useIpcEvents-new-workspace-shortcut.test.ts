@@ -4,6 +4,8 @@ import {
   openNewWorkspaceFromShortcut
 } from './ipc-events/new-workspace-command'
 
+type ShortcutState = Parameters<typeof buildNewWorkspaceShortcutModalData>[0]
+
 describe('buildNewWorkspaceShortcutModalData', () => {
   it('carries the active Linear issue into the Cmd+N composer', () => {
     const data = buildNewWorkspaceShortcutModalData({
@@ -58,6 +60,39 @@ describe('buildNewWorkspaceShortcutModalData', () => {
     } as never)
 
     expect(data).toEqual({ telemetrySource: 'shortcut' })
+  })
+
+  it('labels plain Cmd+N as a new session while the sessions list shows', () => {
+    const state: ShortcutState = { activeView: 'terminal', taskPageData: {}, sidebarBody: 'agents' }
+    const data = buildNewWorkspaceShortcutModalData(state)
+
+    expect(data).toEqual({ telemetrySource: 'shortcut', asSession: true })
+  })
+
+  it('keeps Cmd+N from a Linear issue a workspace action, like its Start-workspace button', () => {
+    const state: ShortcutState = {
+      activeView: 'tasks',
+      sidebarBody: 'agents',
+      taskPageData: {
+        openLinearIssue: {
+          id: 'issue-1',
+          identifier: 'ENG-123',
+          title: 'Fix Linear context handoff',
+          url: 'https://linear.app/acme/issue/ENG-123/fix-linear-context-handoff',
+          state: { name: 'Todo', type: 'unstarted', color: '#999999' },
+          team: { id: 'team-1', name: 'Engineering', key: 'ENG' },
+          labels: [],
+          labelIds: [],
+          priority: 3,
+          estimate: null,
+          updatedAt: '2026-05-29T12:00:00.000Z'
+        }
+      }
+    }
+    const data = buildNewWorkspaceShortcutModalData(state)
+
+    expect(data.asSession).toBeUndefined()
+    expect(data.prefilledName).toBe('eng-123-fix-linear-context-handoff')
   })
 })
 

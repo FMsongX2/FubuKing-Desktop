@@ -61,6 +61,7 @@ export function ActivityThreadListPane({
   onClearCompleted,
   visibleThreadGroups,
   visibleThreadCount,
+  emptyMessage,
   selectedPaneKey,
   onSelectThread,
   onJumpToWorkspace,
@@ -97,6 +98,8 @@ export function ActivityThreadListPane({
   onClearCompleted?: () => void
   visibleThreadGroups: ActivityThreadGroup[]
   visibleThreadCount: number
+  /** Shown instead of the no-match text when the list is empty for another reason. */
+  emptyMessage?: string
   selectedPaneKey: string | null
   onSelectThread: (thread: AgentPaneThread) => void
   onJumpToWorkspace: (thread: AgentPaneThread) => void
@@ -375,10 +378,11 @@ export function ActivityThreadListPane({
           </div>
           {visibleThreadCount === 0 ? (
             <div className="px-3 py-8 text-center text-xs text-muted-foreground">
-              {translate(
-                'auto.components.activity.ActivityPrototypePage.7cd632006b',
-                'No agent activity matches these filters.'
-              )}
+              {emptyMessage ??
+                translate(
+                  'auto.components.activity.ActivityPrototypePage.7cd632006b',
+                  'No agent activity matches these filters.'
+                )}
             </div>
           ) : null}
         </div>

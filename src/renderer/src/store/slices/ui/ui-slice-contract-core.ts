@@ -205,6 +205,8 @@ export type UISliceCore = {
       highlight?: boolean
       beginRename?: boolean
       executionHostId?: ExecutionHostId
+      // For reveals that are the action itself; others leave the sessions list showing.
+      switchFromAgentsBody?: boolean
     }
   ) => void
   revealSidebarRow: (
@@ -212,6 +214,7 @@ export type UISliceCore = {
     options?: {
       behavior?: PendingSidebarRowReveal['behavior']
       highlight?: boolean
+      switchFromAgentsBody?: boolean
     }
   ) => void
 }

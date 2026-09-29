@@ -52,6 +52,8 @@ type ComposerModalData = {
   telemetrySource?: WorkspaceCreateTelemetrySource
   contextualTourSource?: string
   setupGuideTourRequestId?: string
+  /** Opened from a New session control (row or its shortcut): label the dialog as a session. */
+  asSession?: boolean
 }
 
 export default function NewWorkspaceComposerModal(): React.JSX.Element | null {
@@ -231,9 +233,11 @@ function QuickTabBody({
   const isFolderWorkspaceTarget = selectedProjectOption?.kind === 'project-group'
   const primaryActionLabel = isFolderWorkspaceTarget
     ? getFolderWorkspacePrimaryActionLabel()
-    : cardProps.selectedRepoIsGit
-      ? translate('auto.components.NewWorkspaceComposerModal.createWorktree', 'Create worktree')
-      : translate('auto.components.NewWorkspaceComposerModal.createWorkspace', 'Create workspace')
+    : modalData.asSession
+      ? translate('components.newWorkspaceComposer.startSession', 'Start session')
+      : cardProps.selectedRepoIsGit
+        ? translate('auto.components.NewWorkspaceComposerModal.createWorktree', 'Create worktree')
+        : translate('auto.components.NewWorkspaceComposerModal.createWorkspace', 'Create workspace')
 
   // Cmd/Ctrl+Enter submits. Escape belongs to the dialog's dismissable layer:
   // the page-style "blur the focused field first" rule assumes the user chose
@@ -280,7 +284,9 @@ function QuickTabBody({
                 'auto.components.sidebar.FolderWorkspaceComposerDialog.title',
                 'Create Folder Workspace'
               )
-            : primaryActionLabel}
+            : modalData.asSession
+              ? translate('components.sidebar.newSession', 'New session')
+              : primaryActionLabel}
         </DialogTitle>
         <DialogDescription className="sr-only">
           {translate(

@@ -132,8 +132,10 @@ export function buildDefaultSettings(args: {
     terminalLinkActionPopoverEnabled: true,
     terminalLinkClickBehavior: 'actions',
     terminalUrlMiddleClickBehavior: 'open',
-    openAgentTabsInChatByDefault: false,
-    experimentalNativeChat: false,
+    // Why on: every agent session shows Chat and Terminal tabs, Chat first, over the same PTY.
+    // The structured flag stays off: it would open Claude and Codex with no terminal underneath.
+    openAgentTabsInChatByDefault: true,
+    experimentalNativeChat: true,
     experimentalStructuredNativeChat: false,
     nativeChatResumeWorkOnRestart: false,
     nativeChatInheritShellEnvironment: true,

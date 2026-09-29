@@ -5,17 +5,21 @@ import type { AppState } from '../../store/types'
 
 type NewWorkspaceShortcutModalData = {
   telemetrySource: 'shortcut'
+  asSession?: true
   prefilledName?: string
   linkedWorkItem?: LinkedWorkItemSummary
 }
 
 export function buildNewWorkspaceShortcutModalData(
-  state: Pick<AppState, 'activeView' | 'taskPageData'>
+  state: Pick<AppState, 'activeView' | 'taskPageData' | 'sidebarBody'>
 ): NewWorkspaceShortcutModalData {
   const linearIssue =
     state.activeView === 'tasks' ? (state.taskPageData.openLinearIssue ?? null) : null
   if (!linearIssue) {
-    return { telemetrySource: 'shortcut' }
+    // Why asSession: the sessions sidebar shows this shortcut on its New session row.
+    return state.sidebarBody === 'agents'
+      ? { telemetrySource: 'shortcut', asSession: true }
+      : { telemetrySource: 'shortcut' }
   }
 
   return {
@@ -27,7 +31,7 @@ export function buildNewWorkspaceShortcutModalData(
 }
 
 export function openNewWorkspaceFromShortcut(
-  state: Pick<AppState, 'activeModal' | 'activeView' | 'taskPageData' | 'openModal'>
+  state: Pick<AppState, 'activeModal' | 'activeView' | 'taskPageData' | 'sidebarBody' | 'openModal'>
 ): void {
   if (state.activeModal === 'new-workspace-composer') {
     return

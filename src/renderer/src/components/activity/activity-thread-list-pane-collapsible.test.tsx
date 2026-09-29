@@ -290,3 +290,61 @@ describe('ActivityThreadListPane collapsible sections', () => {
     expect(onMarkThreadUnread).toHaveBeenCalledWith(mockThread)
   })
 })
+
+describe('ActivityThreadListPane empty state', () => {
+  let container: HTMLDivElement
+  let root: Root
+
+  beforeEach(() => {
+    container = document.createElement('div')
+    document.body.appendChild(container)
+    root = createRoot(container)
+  })
+
+  afterEach(() => {
+    act(() => root.unmount())
+    container.remove()
+    document.body.replaceChildren()
+  })
+
+  function renderEmpty(emptyMessage?: string): void {
+    act(() => {
+      root.render(
+        <TooltipProvider>
+          <ActivityThreadListPane
+            activityFilterInputRef={{ current: null }}
+            query=""
+            onQueryChange={vi.fn()}
+            groupBy="status"
+            onGroupByChange={vi.fn()}
+            readFilter="all"
+            onReadFilterChange={vi.fn()}
+            compactMode={false}
+            hasUnreadThreads={false}
+            onCompactModeChange={vi.fn()}
+            visibleThreadGroups={[]}
+            visibleThreadCount={0}
+            emptyMessage={emptyMessage}
+            selectedPaneKey={null}
+            onSelectThread={vi.fn()}
+            onJumpToWorkspace={vi.fn()}
+            onMarkThreadRead={vi.fn()}
+            onMarkThreadUnread={vi.fn()}
+            canJumpToWorkspace={() => true}
+            showFilterControls={false}
+            showOptionsMenu={false}
+          />
+        </TooltipProvider>
+      )
+    })
+  }
+
+  it('blames the filters by default and shows the caller message instead when given', () => {
+    renderEmpty()
+    expect(container.textContent).toContain('No agent activity matches these filters.')
+
+    renderEmpty('No sessions yet.')
+    expect(container.textContent).toContain('No sessions yet.')
+    expect(container.textContent).not.toContain('matches these filters')
+  })
+})

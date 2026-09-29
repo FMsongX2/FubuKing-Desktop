@@ -74,7 +74,12 @@ export function createUiAgentActions(
         targets.some((target) => target.status === 'eligible') &&
         (previousMode?.id !== args.id || previousMode.worktreeId !== args.worktreeId)
       ) {
-        get().revealWorktreeInSidebar(args.worktreeId, { behavior: 'auto', highlight: true })
+        // Why switchFromAgentsBody: targets are picked on the worktree card, so the list must show.
+        get().revealWorktreeInSidebar(args.worktreeId, {
+          behavior: 'auto',
+          highlight: true,
+          switchFromAgentsBody: true
+        })
       }
     },
     diffNotesSendMenuOpenRequest: null,

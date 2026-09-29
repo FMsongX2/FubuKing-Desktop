@@ -200,13 +200,13 @@ describe('SidebarHeader', () => {
     expect(container.textContent).not.toContain('⌘N')
   })
 
-  it('opens agent activity from the bell button', () => {
+  it('opens the sessions list from the bell button', () => {
     act(() => {
       root.render(<SidebarHeader onWorkspaceBoardMenuOpenChange={vi.fn()} />)
     })
 
     const activityButton = container.querySelector<HTMLButtonElement>(
-      '[aria-label="View activity"]'
+      '[aria-label="Show sessions"]'
     )
     expect(activityButton).toBeTruthy()
 
@@ -234,14 +234,14 @@ describe('SidebarHeader', () => {
     expect(container.querySelector('[data-intro-open]')).toBeNull()
   })
 
-  it('turns off agent activity from the active bell button', () => {
+  it('switches back to workspaces from the active bell button', () => {
     mockState.sidebarBody = 'agents'
     act(() => {
       root.render(<SidebarHeader onWorkspaceBoardMenuOpenChange={vi.fn()} />)
     })
 
     const activityButton = container.querySelector<HTMLButtonElement>(
-      '[aria-label="Turn off activity view"]'
+      '[aria-label="Show workspaces"]'
     )
     expect(activityButton?.getAttribute('aria-pressed')).toBe('true')
 
@@ -270,14 +270,17 @@ describe('SidebarHeader', () => {
     )
   })
 
-  it('drops both project actions in the agents view, which lists activity, not projects', () => {
+  it('drops the project actions and New workspace in the sessions view, which opens with its own New session row', () => {
     mockState.sidebarBody = 'agents'
     act(() => {
       root.render(<SidebarHeader onWorkspaceBoardMenuOpenChange={vi.fn()} />)
     })
 
-    expect(container.querySelector('[aria-label="Turn off activity view"]')).toBeTruthy()
-    expect(container.querySelector('[aria-label="New workspace"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Show workspaces"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="New workspace"]')).toBeNull()
+    expect(container.querySelector('[data-sidebar-section-title="sessions"]')?.textContent).toBe(
+      'Sessions'
+    )
     expect(container.querySelector('[aria-label="Workspace options"]')).toBeNull()
     expect(container.querySelector('[aria-label="Add project"]')).toBeNull()
   })
@@ -291,7 +294,7 @@ describe('SidebarHeader', () => {
     const headerClasses = new Set(headerRow?.className.split(/\s+/) ?? [])
     expect(headerClasses.has('flex-wrap')).toBe(false)
     expect(headerClasses.has('h-8')).toBe(true)
-    expect(container.querySelector('[aria-label="View activity"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Show sessions"]')).toBeTruthy()
     expect(container.querySelector('[aria-label="Add project"]')).toBeTruthy()
     expect(container.querySelector('[aria-label="New workspace"]')).toBeTruthy()
   })
@@ -303,7 +306,7 @@ describe('SidebarHeader', () => {
     })
 
     expect(container.querySelector('[aria-label="Add project"]')).toBeTruthy()
-    expect(container.querySelector('[aria-label="View activity"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Show sessions"]')).toBeTruthy()
     expect(container.querySelector('[aria-label="New workspace"]')).toBeTruthy()
     expect(container.querySelector('[aria-label="Workspace options"]')).toBeTruthy()
     expect(container.querySelector('[aria-label="More workspace actions"]')).toBeNull()

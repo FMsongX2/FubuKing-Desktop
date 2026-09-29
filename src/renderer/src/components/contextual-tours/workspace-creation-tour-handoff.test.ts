@@ -37,6 +37,13 @@ describe('openWorkspaceCreationComposerWithTourHandoff', () => {
     })
     expect(detachContextualTourSource).not.toHaveBeenCalled()
     expect(requestContextualTourWhenReady).not.toHaveBeenCalled()
+
+    openWorkspaceCreationComposerWithTourHandoff({ asSession: true })
+
+    expect(openModal).toHaveBeenLastCalledWith('new-workspace-composer', {
+      telemetrySource: 'sidebar',
+      asSession: true
+    })
   })
 
   it('hands off from the agent sessions create-worktree step to the workspace-creation tour', () => {

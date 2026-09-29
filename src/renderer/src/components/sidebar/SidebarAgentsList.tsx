@@ -66,6 +66,7 @@ export default function SidebarAgentsList({
     storeData,
     selectedPaneKeyIsLive,
     effectiveSelectedPaneKey,
+    allThreads,
     visibleThreads,
     markAllReadThreads,
     visibleThreadGroups
@@ -153,6 +154,12 @@ export default function SidebarAgentsList({
         onClearCompleted={handleClearCompleted}
         visibleThreadGroups={visibleThreadGroups}
         visibleThreadCount={visibleThreads.length}
+        // Why: with no sessions at all, the default "matches these filters" text blames a filter.
+        emptyMessage={
+          allThreads.length === 0
+            ? translate('components.sidebar.noSessions', 'No sessions yet.')
+            : undefined
+        }
         selectedPaneKey={effectiveSelectedPaneKey}
         onSelectThread={selectThread}
         onJumpToWorkspace={jumpToWorkspace}

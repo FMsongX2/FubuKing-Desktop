@@ -50,17 +50,43 @@ beforeEach(() => {
 })
 
 describe('sidebar reveal actions', () => {
-  it('switch the sidebar body back to Spaces so the worktree list can consume the reveal', () => {
+  it('opens on the sessions list', () => {
+    expect(createUIStore().getState().sidebarBody).toBe('agents')
+  })
+
+  it('keeps the sessions list when an activation reveals a worktree', () => {
     const store = createUIStore()
     store.getState().setSidebarBody('agents')
+
+    store.getState().revealWorktreeInSidebar('wt-1', { highlight: true })
+    store.getState().revealSidebarRow('repo:r1')
+    expect(store.getState().sidebarBody).toBe('agents')
+    expect(store.getState().pendingRevealWorktree).toBeNull()
+    expect(store.getState().pendingRevealSidebarRow).toBeNull()
+  })
+
+  it('leaves the sessions list for reveals that are the action itself', () => {
+    const store = createUIStore()
+    store.getState().setSidebarBody('agents')
+    store.getState().revealSidebarRow('repo:r1', { switchFromAgentsBody: true })
+    expect(store.getState().sidebarBody).toBe('workspaces')
+    expect(store.getState().pendingRevealSidebarRow?.rowKey).toBe('repo:r1')
+
+    store.getState().setSidebarBody('agents')
+    store.getState().revealWorktreeInSidebar('wt-1', { switchFromAgentsBody: true })
+    expect(store.getState().sidebarBody).toBe('workspaces')
+    expect(store.getState().pendingRevealWorktree?.worktreeId).toBe('wt-1')
+  })
+
+  it('reveals in the worktree list when it is showing', () => {
+    const store = createUIStore()
+    store.getState().setSidebarBody('workspaces')
 
     store.getState().revealWorktreeInSidebar('wt-1', { highlight: true })
     expect(store.getState().sidebarBody).toBe('workspaces')
     expect(store.getState().pendingRevealWorktree?.worktreeId).toBe('wt-1')
 
-    store.getState().setSidebarBody('agents')
     store.getState().revealSidebarRow('repo:r1')
-    expect(store.getState().sidebarBody).toBe('workspaces')
     expect(store.getState().pendingRevealSidebarRow?.rowKey).toBe('repo:r1')
   })
 })
@@ -644,6 +670,7 @@ describe('createUISlice hydratePersistedUI', () => {
 
   it('stores pending sidebar reveal rename requests', () => {
     const store = createUIStore()
+    store.getState().setSidebarBody('workspaces')
 
     store.getState().revealWorktreeInSidebar('repo1::/feature', {
       behavior: 'smooth',

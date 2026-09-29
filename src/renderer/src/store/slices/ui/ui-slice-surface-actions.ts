@@ -150,26 +150,37 @@ export function createUiSurfaceActions(set: UISliceSet, _get: UISliceGet): Parti
     pendingRevealSidebarRow: null,
     // Why sidebarBody here: the worktree list (and its reveal consumer) is unmounted while the
     // Agents body is showing, so a reveal that does not switch bodies silently no-ops.
+    // Why not from the Agents body by default: it is the sessions sidebar, and activation (a new
+    // session included) reveals by default. Reveals that are the action itself opt in with
+    // switchFromAgentsBody; the reveal-current-workspace request switches via the body redirect.
     revealWorktreeInSidebar: (worktreeId, options) =>
-      set({
-        sidebarBody: 'workspaces',
-        pendingRevealWorktree: {
-          worktreeId,
-          ...(options?.executionHostId ? { executionHostId: options.executionHostId } : {}),
-          behavior: options?.behavior ?? 'smooth',
-          ...(options?.highlight ? { highlight: true } : {}),
-          ...(options?.beginRename ? { beginRename: true } : {})
-        }
-      }),
+      set((state) =>
+        state.sidebarBody === 'agents' && !options?.switchFromAgentsBody
+          ? state
+          : {
+              sidebarBody: 'workspaces',
+              pendingRevealWorktree: {
+                worktreeId,
+                ...(options?.executionHostId ? { executionHostId: options.executionHostId } : {}),
+                behavior: options?.behavior ?? 'smooth',
+                ...(options?.highlight ? { highlight: true } : {}),
+                ...(options?.beginRename ? { beginRename: true } : {})
+              }
+            }
+      ),
     revealSidebarRow: (rowKey, options) =>
-      set({
-        sidebarBody: 'workspaces',
-        pendingRevealSidebarRow: {
-          rowKey,
-          behavior: options?.behavior ?? 'smooth',
-          ...(options?.highlight === false ? {} : { highlight: true })
-        }
-      }),
+      set((state) =>
+        state.sidebarBody === 'agents' && !options?.switchFromAgentsBody
+          ? state
+          : {
+              sidebarBody: 'workspaces',
+              pendingRevealSidebarRow: {
+                rowKey,
+                behavior: options?.behavior ?? 'smooth',
+                ...(options?.highlight === false ? {} : { highlight: true })
+              }
+            }
+      ),
     clearPendingRevealWorktreeId: () => set({ pendingRevealWorktree: null }),
     clearPendingRevealSidebarRow: () => set({ pendingRevealSidebarRow: null }),
     scrollToDiffCommentId: null,

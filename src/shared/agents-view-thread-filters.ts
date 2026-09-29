@@ -8,7 +8,8 @@ export type ThreadReadFilter = (typeof THREAD_READ_FILTER_VALUES)[number]
 export type ActivityGroupBy = (typeof ACTIVITY_GROUP_BY_VALUES)[number]
 
 export const DEFAULT_AGENTS_READ_FILTER: ThreadReadFilter = 'all'
-export const DEFAULT_AGENTS_GROUP_BY: ActivityGroupBy = 'status'
+// Why project: the sessions sidebar lists sessions under their project, as Claude's app does.
+export const DEFAULT_AGENTS_GROUP_BY: ActivityGroupBy = 'project'
 
 export function normalizeThreadReadFilter(value: unknown): ThreadReadFilter {
   return isMember(THREAD_READ_FILTER_VALUES, value) ? value : DEFAULT_AGENTS_READ_FILTER

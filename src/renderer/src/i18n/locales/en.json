@@ -3277,7 +3277,7 @@
             "missing": {
               "tui": {
                 "title": "This ZCode build has no terminal UI",
-                "description": "Orca's hooks installed correctly \u2014 the zcode on your PATH just cannot open a session. The ZCode desktop app bundles the agent runtime without its terminal UI. Install a zcode that ships the TUI, then run zcode outside Orca to confirm."
+                "description": "Orca's hooks installed correctly — the zcode on your PATH just cannot open a session. The ZCode desktop app bundles the agent runtime without its terminal UI. Install a zcode that ships the TUI, then run zcode outside Orca to confirm."
               }
             }
           },
@@ -3976,7 +3976,9 @@
             }
           },
           "tooltip": {
-            "zcode": { "mcp": "MCP" },
+            "zcode": {
+              "mcp": "MCP"
+            },
             "cedb7b99e3": "% used",
             "6d6df77f41": "No data available",
             "7f7f208060": "Monthly",
@@ -17874,6 +17876,11 @@
         "label": "Context {{used}} of {{window}} tokens, {{percent}}% used",
         "title": "Context",
         "estimated": "Estimated from the last response."
+      },
+      "viewTabs": {
+        "label": "Session view",
+        "chat": "Chat",
+        "terminal": "Terminal"
       }
     },
     "tab": {
@@ -18200,6 +18207,13 @@
     },
     "agentChildRow": {
       "ended": "Ended"
+    },
+    "sidebar": {
+      "newSession": "New session",
+      "noSessions": "No sessions yet."
+    },
+    "newWorkspaceComposer": {
+      "startSession": "Start session"
     }
   },
   "dashboardPopout": {
@@ -18288,7 +18302,10 @@
       "openActivity": "View activity",
       "closeActivity": "Turn off activity view",
       "projects": "Projects",
-      "workspaces": "Workspaces"
+      "workspaces": "Workspaces",
+      "sessions": "Sessions",
+      "showWorkspaces": "Show workspaces",
+      "showSessions": "Show sessions"
     }
   },
   "runtimeRpc": {

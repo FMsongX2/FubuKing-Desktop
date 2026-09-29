@@ -6,8 +6,16 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { useAppStore } from '@/store'
 import SidebarAgentsList from './SidebarAgentsList'
 
+const pane = vi.hoisted(() => {
+  const captured: { props: { emptyMessage?: string } | null } = { props: null }
+  return captured
+})
+
 vi.mock('@/components/activity/activity-thread-list-pane', () => ({
-  ActivityThreadListPane: () => null
+  ActivityThreadListPane: (props: { emptyMessage?: string }) => {
+    pane.props = props
+    return null
+  }
 }))
 
 beforeEach(() => {
@@ -62,4 +70,22 @@ it('preserves workspace focus on mount and focuses search only when explicitly e
   expect(useAppStore.getState().agentsShowSearch).toBe(true)
   expect(window.api.ui.set).toHaveBeenCalledWith({ agentsShowSearch: false })
   expect(window.api.ui.set).toHaveBeenCalledWith({ agentsShowSearch: true })
+})
+
+it('tells the list there are no sessions yet, instead of blaming a filter, when nothing ran', () => {
+  render(
+    <TooltipProvider>
+      <SidebarAgentsList
+        readFilter="all"
+        setReadFilter={vi.fn()}
+        groupBy="project"
+        setGroupBy={vi.fn()}
+        query=""
+        setQuery={vi.fn()}
+        optionsTarget={null}
+      />
+    </TooltipProvider>
+  )
+
+  expect(pane.props?.emptyMessage).toBe('No sessions yet.')
 })

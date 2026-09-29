@@ -17311,6 +17311,13 @@
     }
   },
   "components": {
+    "sidebar": {
+      "newSession": "새 세션",
+      "noSessions": "아직 세션이 없습니다."
+    },
+    "newWorkspaceComposer": {
+      "startSession": "세션 시작"
+    },
     "onboarding": {
       "flow": {
         "stepTooltip": {
@@ -17545,6 +17552,11 @@
       "toggle": {
         "showTerminal": "terminal 표시",
         "showChat": "채팅 보기 표시"
+      },
+      "viewTabs": {
+        "label": "세션 보기 방식",
+        "chat": "채팅",
+        "terminal": "터미널"
       },
       "state": {
         "loading": {
@@ -18161,7 +18173,10 @@
       "openActivity": "활동 보기",
       "closeActivity": "활동 보기 닫기",
       "projects": "프로젝트",
-      "workspaces": "워크스페이스"
+      "workspaces": "워크스페이스",
+      "sessions": "세션",
+      "showWorkspaces": "워크스페이스 보기",
+      "showSessions": "세션 보기"
     }
   },
   "browser": {
