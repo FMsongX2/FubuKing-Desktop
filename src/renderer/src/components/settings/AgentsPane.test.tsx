@@ -9,6 +9,7 @@ import { useAppStore } from '../../store'
 import { getAgentGeneratedTabTitlesTitle } from './agent-generated-tab-title-copy'
 import { getAgentStatusHooksTitle } from './agent-status-hooks-copy'
 import { getAgentAwakeDescription, getAgentAwakeTitle } from './agent-awake-copy'
+import { getCodexTerminalServerIsolationTitle } from './codex-terminal-server-isolation-copy'
 import { AgentAwakeSetting } from './AgentAwakeSetting'
 import { AgentRuntimeSetting } from './AgentRuntimeSetting'
 import type * as AgentRuntimeSettingModule from './AgentRuntimeSetting'
@@ -260,6 +261,17 @@ describe('AgentsPane', () => {
       ).toBe(false)
     } finally {
       delete (globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__
+    }
+  })
+
+  it('keeps the host-only Codex server row out of paired web clients', () => {
+    Reflect.set(globalThis, '__ORCA_WEB_CLIENT__', true)
+    try {
+      expect(renderPane(getDefaultSettings('/tmp'))).not.toContain(
+        getCodexTerminalServerIsolationTitle()
+      )
+    } finally {
+      Reflect.deleteProperty(globalThis, '__ORCA_WEB_CLIENT__')
     }
   })
 
