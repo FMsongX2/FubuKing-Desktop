@@ -10,6 +10,7 @@ import { useAppStore } from '@/store'
 import { AgentAwakeSetting } from './AgentAwakeSetting'
 import { AgentCacheTimerSection } from './AgentCacheTimerSection'
 import { AgentRuntimeSetting } from './AgentRuntimeSetting'
+import { CodexTerminalServerIsolationSetting } from './CodexTerminalServerIsolationSetting'
 import { buildCodexSessionSourceHomeControl } from './codex-session-source-home-control'
 import {
   getAgentGeneratedTabTitlesDescription,
@@ -260,6 +261,9 @@ export function AgentsPane({
       />
       <FubuKingSetting settings={settings} updateSettings={updateSettings} />
       <AgentStatusHooksSetting settings={settings} updateSettings={updateSettings} />
+      {!isPairedWebClientWindow() ? (
+        <CodexTerminalServerIsolationSetting settings={settings} updateSettings={updateSettings} />
+      ) : null}
       <AgentGeneratedTabTitlesSetting settings={settings} updateSettings={updateSettings} />
       {!isPairedWebClientWindow() ? (
         <AgentAwakeSetting settings={settings} updateSettings={updateSettings} />

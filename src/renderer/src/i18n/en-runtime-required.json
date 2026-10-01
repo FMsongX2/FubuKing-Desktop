@@ -1582,6 +1582,7 @@
             "2afd3b5858": "enable",
             "2e188c771c": "hide",
             "32836788b0": "generated title",
+            "34337ed5c7": "isolate",
             "48f84d10f1": "running",
             "52115d0d7c": "auto",
             "5784ae8c43": "rename",
@@ -1591,12 +1592,15 @@
             "66b6b82eb4": "awake",
             "6956646a1e": "title",
             "6984d4291a": "status",
+            "7e15b89f6e": "server",
             "845ad9128a": "power",
             "848dcae8d3": "generated",
             "8599603496": "done",
             "87fffe6c20": "show",
             "8a17fd6026": "stable",
             "966890236d": "name",
+            "9a84e65118": "agents overview",
+            "9f3becc4e8": "shared",
             "a6d594c17d": "install",
             "a79d266f71": "session",
             "afbf35be68": "stable session",
@@ -1613,6 +1617,7 @@
             "ef804b7337": "Agent Location",
             "f2932bf22b": "detected",
             "f412abbba5": "claude",
+            "ff457e1e7b": "daemon",
             "ff8de8a2ad": "display"
           }
         },
@@ -2675,6 +2680,7 @@
       "ask": {
         "asked": "Asked:",
         "awaiting": "Awaiting user input:",
+        "awaitingUnnamed": "Awaiting user input",
         "questionCount": "{{value0}} questions"
       },
       "composer": {

@@ -9,9 +9,12 @@ import type { RuntimeTerminalWaitBlockedReason } from '../../shared/runtime-type
 import type { TuiAgent } from '../../shared/tui-agent'
 import { findAntigravityReadyPromptIndex } from './antigravity-terminal-readiness'
 import {
+  findCodexHeaderIndex,
   findCodexScreenReadyPromptIndex,
-  isCodexComposerReadyScreen
+  isCodexComposerReadyScreen,
+  isCodexProvisionalStartupText
 } from './codex-terminal-readiness'
+import { findStartupDialogBlockedSignals } from './startup-dialog-blocked-signals'
 import { startOfLastLines, startOfLastNonBlankLines } from './terminal-wait-tail-window'
 
 const EXPLICIT_IDLE_TITLE_RE = /(^|\s)(ready|idle|done)(\s|$|[.!?])/i
@@ -53,23 +56,42 @@ export function isKnownReadyPromptPreview(preview: string): boolean {
 }
 
 /**
+ * The ready-prompt text rules for a pane about to take input. Unlike isKnownReadyPromptPreview
+ * (agent presence), Codex's provisional startup header does not count: 0.157 discards input typed
+ * behind it while its daemon starts.
+ */
+export function isKnownReadyPromptSettled(preview: string): boolean {
+  const normalized = preview.toLowerCase()
+  return isReadyPromptSettled(normalized, findKnownReadyPromptIndex(normalized))
+}
+
+function isReadyPromptSettled(normalized: string, readyIndex: number | null): boolean {
+  return (
+    isReadyPromptUnblocked(normalized, readyIndex) && !isCodexProvisionalStartupText(normalized)
+  )
+}
+
+/**
  * Tier 1 body evidence for every tui-idle site. `readScreenLines` yields the live emulator's
  * visible grid, or null when the runtime has no trustworthy one.
  *
- * Why the screen: Codex repaints its header by cell diff (`ESC[5;3Hdir ESC[5;7Hctory:`), which
- * only a grid reassembles — the line-folded wait text reads `dirctory:` forever.
- * Why it can only add readiness: a grid out of step with the PTY (size mismatch, resize
- * mid-paint) garbles the header, so the text rules keep every verdict they give today.
+ * Why not for a clocked Codex pane: its header stays up through every turn, so it proves only
+ * that Codex started; isQuietReadyScreenBody holds it to quiescence instead.
+ * Why a clockless pane keeps it: quiescence needs an output clock, which a restored pane lacks.
  */
 export function isKnownReadyPromptBody(
   waitText: string,
   agent: TuiAgent | null,
-  readScreenLines: () => readonly string[] | null
+  readScreenLines: () => readonly string[] | null,
+  hasOutputClock: boolean
 ): boolean {
   if (agent === 'qoder') {
     return isQoderComposerReady(readScreenLines())
   }
-  if (isKnownReadyPromptPreview(waitText)) {
+  if (agent === 'codex' && hasOutputClock) {
+    return false
+  }
+  if (isKnownReadyPromptSettled(waitText)) {
     return true
   }
   // Why the agent gate: another agent's screen can merely mention "OpenAI Codex".
@@ -77,7 +99,7 @@ export function isKnownReadyPromptBody(
     return false
   }
   const screen = readScreen(readScreenLines)
-  return screen !== null && isReadyPromptUnblocked(screen, findCodexScreenReadyPromptIndex(screen))
+  return screen !== null && isCodexScreenHeaderReady(screen)
 }
 
 /**
@@ -92,9 +114,27 @@ export function isQuietReadyScreenBody(
 ): boolean {
   if (agent === 'codex') {
     const screen = readScreen(readScreenLines)
-    return screen !== null && isCodexComposerReadyScreen(screen)
+    if (
+      screen !== null &&
+      (isCodexComposerReadyScreen(screen) || isCodexScreenHeaderReady(screen))
+    ) {
+      return true
+    }
+    // Why the provisional veto here too: a daemon start can stay quiet past the quiescence window.
+    const normalized = waitText.toLowerCase()
+    return isReadyPromptSettled(normalized, findCodexReadyPromptIndex(normalized))
   }
   return (agent === null || agent === 'muse') && isMuseReadyPromptPreview(waitText)
+}
+
+/**
+ * Why the screen: Codex repaints its 0.150-0.157 header by cell diff (`ESC[5;3Hdir
+ * ESC[5;7Hctory:`), which only a grid reassembles — the line-folded wait text reads `dirctory:`.
+ * Why it can only add readiness: a grid out of step with the PTY (size mismatch, resize
+ * mid-paint) garbles the header, so the text rule keeps every verdict it gives on its own.
+ */
+function isCodexScreenHeaderReady(screen: string): boolean {
+  return isReadyPromptUnblocked(screen, findCodexScreenReadyPromptIndex(screen))
 }
 
 function readScreen(readScreenLines: () => readonly string[] | null): string | null {
@@ -139,6 +179,7 @@ export function findActionableTerminalWaitBlockedSignal(
 function findDismissedStartupModalIndex(normalized: string): number | null {
   const indexes = [
     findCodexReadyPromptIndex(normalized),
+    findCodexHeaderIndex(normalized),
     findAntigravityReadyPromptIndex(normalized),
     findCursorActivePromptIndex(normalized),
     findMuseReadyPromptIndex(normalized)
@@ -199,7 +240,7 @@ function findCodexReadyPromptIndex(normalized: string): number | null {
 }
 
 export const TERMINAL_WAIT_BLOCKED_SENTINEL_RE =
-  /update available|choose working directory to|codex just got an upgrade|hooks need review|do you trust|trust this|trusted workspace|press enter to (?:confirm|continue|view|insert)|press t to trust|permission required|requires permission|allow once|allow always|run this command\?/i
+  /update available|choose working directory to|codex just got an upgrade|available\s*·|esc\s*skip|enter\s*confirm\s*·|enter\/esc\s*(?:continue|confirm)|hooks need review|do you trust|trust this|trusted workspace|press enter to (?:confirm|continue|view|insert)|press t to trust|permission required|requires permission|allow once|allow always|run this command\?/i
 
 // Why text at all: cursor-agent has no approval hook, so the key-bound menu is the only authority.
 const CURSOR_APPROVAL_CHOICE_MARKERS = [
@@ -268,27 +309,7 @@ function findTerminalWaitBlockedSignal(
 function findBlockedSignalInLiveWindow(
   normalized: string
 ): { reason: RuntimeTerminalWaitBlockedReason; index: number } | null {
-  const candidates: { reason: RuntimeTerminalWaitBlockedReason; index: number }[] = []
-  const updateIndex = normalized.lastIndexOf('update available')
-  if (updateIndex !== -1 && normalized.includes('press enter to continue', updateIndex)) {
-    candidates.push({ reason: 'agent-update-prompt', index: updateIndex })
-  }
-  const cwdIndex = normalized.lastIndexOf('choose working directory to')
-  if (cwdIndex !== -1 && normalized.includes('press enter to continue', cwdIndex)) {
-    candidates.push({ reason: 'agent-cwd-prompt', index: cwdIndex })
-  }
-  const modelMigrationIndex = normalized.lastIndexOf('codex just got an upgrade')
-  if (
-    modelMigrationIndex !== -1 &&
-    normalized.includes('press enter to continue', modelMigrationIndex)
-  ) {
-    candidates.push({ reason: 'codex-model-migration-prompt', index: modelMigrationIndex })
-  }
-  const hooksIndex = normalized.lastIndexOf('hooks need review')
-  if (hooksIndex !== -1 && normalized.includes('press enter to confirm', hooksIndex)) {
-    // Why neutral: this matcher never inspects the agent -- 'hooks need review' is not Codex-only wording.
-    candidates.push({ reason: 'agent-hooks-review-prompt', index: hooksIndex })
-  }
+  const candidates = findStartupDialogBlockedSignals(normalized)
   const trustIndex = Math.max(
     normalized.lastIndexOf('do you trust'),
     normalized.lastIndexOf('trust this'),
