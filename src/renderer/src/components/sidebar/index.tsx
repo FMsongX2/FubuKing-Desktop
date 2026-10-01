@@ -1,10 +1,12 @@
+// 프로젝트 작업 화면과 세션 중심 사이드바를 같은 탐색 상태에 연결한다.
+// 세션 선택과 워크스페이스 상태는 기존 저장소가 소유한다.
 import React, { useEffect, useMemo } from 'react'
 import { useAppStore } from '@/store'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useSidebarResize } from '@/hooks/useSidebarResize'
 import SidebarHeader from './SidebarHeader'
 import SidebarNav from './SidebarNav'
-import SidebarNewSessionButton from './SidebarNewSessionButton'
+import { SessionSidebarNav } from './SessionSidebarNav'
 import SetupScriptPromptCard from './SetupScriptPromptCard'
 import WorktreeList from './WorktreeList'
 import SidebarToolbar from './SidebarToolbar'
@@ -162,12 +164,11 @@ function Sidebar({
         {sidebarOpen && (
           <>
             {/* Fixed controls */}
-            <SidebarNav />
+            {sidebarBody === 'agents' ? <SessionSidebarNav /> : <SidebarNav />}
             <SidebarHeader
               onWorkspaceBoardMenuOpenChange={setWorkspaceBoardMenuOpen}
               activityOptionsTarget={setAgentOptionsTarget}
             />
-            {sidebarBody === 'agents' ? <SidebarNewSessionButton /> : null}
             {sidebarBody === 'agents' ? (
               <React.Suspense fallback={<div className="min-h-0 flex-1" />}>
                 <ActivityThreadCollapseContext.Provider value={agentsCollapseState}>

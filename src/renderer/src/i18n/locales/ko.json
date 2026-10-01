@@ -17313,7 +17313,14 @@
   "components": {
     "sidebar": {
       "newSession": "새 세션",
-      "noSessions": "아직 세션이 없습니다."
+      "noSessions": "아직 세션이 없습니다.",
+      "searchSessions": "세션 검색",
+      "moreFeatures": "더 보기",
+      "newWorkspace": "새 워크스페이스",
+      "searchProjects": "프로젝트와 파일 검색",
+      "tasks": "작업",
+      "automations": "자동화",
+      "mobile": "모바일"
     },
     "newWorkspaceComposer": {
       "startSession": "세션 시작"
@@ -18081,10 +18088,32 @@
             "spaces": "공백"
           }
         }
+      },
+      "fubuking": {
+        "description": "Claude Code나 Codex를 저장소 공유 메모리와 함께 실행한다. 사용 한도에 도달하면 터미널 탭에서 인계를 묻는다.",
+        "installDescription": "사용 설정 전에 실행 호스트에 FubuKing CLI를 설치한다. 새 세션은 여기서 선택한 계정으로 시작하며, 추가 인계 계정은 FubuKing login으로 등록한다.",
+        "installLink": "설치 안내",
+        "claude": "Claude Code를 FubuKing으로 실행",
+        "codex": "Codex를 FubuKing으로 실행",
+        "customCommand": "사용자 지정 실행 명령이 설정돼 있다. 아래에서 명령을 초기화하면 FubuKing을 켤 수 있다.",
+        "handoffLimitations": "인계 후에는 터미널에서 이어서 작업한다. 인계 뒤 채팅 기록과 계정 사용량 동기화는 아직 개발 중이다."
       }
     },
     "agentChildRow": {
       "ended": "종료됨"
+    },
+    "newSession": {
+      "description": "기존 프로젝트에서 새 대화를 시작한다.",
+      "message": "메시지",
+      "placeholder": "어떤 작업을 진행할까?",
+      "project": "프로젝트",
+      "keyboardHint": "Enter로 시작 · Shift+Enter로 줄바꿈",
+      "addProject": "프로젝트 추가",
+      "projectUnavailable": "선택한 프로젝트를 더 이상 사용할 수 없다.",
+      "launchFailed": "세션을 시작하지 못했다.",
+      "welcome": "어떤 작업을 진행할까?",
+      "welcomeDescription": "프로젝트를 선택하고 코딩 에이전트와 새 대화를 시작한다.",
+      "firstProject": "첫 대화를 시작하려면 프로젝트 폴더를 추가한다."
     }
   },
   "dashboardPopout": {

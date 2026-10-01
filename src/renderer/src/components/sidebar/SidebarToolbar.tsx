@@ -1,3 +1,5 @@
+// 기존 작업 도구와 설정 진입점을 사이드바 하단에 유지한다.
+// 작업 폴더 전용 이전 안내는 해당 탐색 모드에서만 표시한다.
 import React from 'react'
 import { Kanban } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -32,12 +34,13 @@ const SidebarToolbar = React.memo(function SidebarToolbar({
   const [workspaceBoardMovedHintOpen, setWorkspaceBoardMovedHintOpen] = React.useState(false)
   const movedHintEligibleRef = React.useRef<boolean | null>(null)
   const persistedUIReady = useAppStore((state) => state.persistedUIReady)
+  const sessionsSidebar = useAppStore((state) => state.sidebarBody === 'agents')
   const hasUsedWorkspaceBoard = useAppStore((state) =>
     hasFeatureInteraction(state.featureInteractions, 'workspace-board')
   )
 
   React.useEffect(() => {
-    if (!persistedUIReady) {
+    if (!persistedUIReady || sessionsSidebar) {
       return
     }
     // Why: only users who had already opened the old board location should
@@ -62,7 +65,7 @@ const SidebarToolbar = React.memo(function SidebarToolbar({
       setWorkspaceBoardMovedHintOpen(false)
     }, WORKSPACE_BOARD_MOVED_HINT_DURATION_MS)
     return () => window.clearTimeout(timeoutId)
-  }, [hasUsedWorkspaceBoard, persistedUIReady])
+  }, [hasUsedWorkspaceBoard, persistedUIReady, sessionsSidebar])
 
   const handleWorkspaceBoardClick = (): void => {
     setWorkspaceBoardMovedHintOpen(false)

@@ -1,3 +1,5 @@
+// 세션과 작업 폴더 탐색 모드의 제목과 전환 동작을 표시한다.
+// 선택과 필터 상태는 기존 저장소가 소유한다.
 import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/store'
@@ -6,7 +8,7 @@ import { SidebarHeaderActions } from './sidebar-header-actions'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverAnchor, PopoverArrow, PopoverContent } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Sparkles, Bell } from 'lucide-react'
+import { Sparkles, FolderOpen, MessagesSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type SidebarHeaderProps = {
@@ -84,7 +86,11 @@ const SidebarHeader = React.memo(function SidebarHeader({
                     aria-pressed={agentsViewActive}
                     onClick={() => setSidebarBody?.(agentsViewActive ? 'workspaces' : 'agents')}
                   >
-                    <Bell className="size-3.5" strokeWidth={2.25} />
+                    {agentsViewActive ? (
+                      <FolderOpen className="size-3.5" />
+                    ) : (
+                      <MessagesSquare className="size-3.5" />
+                    )}
                   </Button>
                 </PopoverAnchor>
               </span>

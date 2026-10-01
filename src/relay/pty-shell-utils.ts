@@ -1,8 +1,11 @@
+// SSH 호스트의 셸과 전경 프로세스 정보를 판별한다.
+// 인계 런처 대신 호스트가 관측한 실제 제공자를 반환한다.
 import { execFile as execFileCb, execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { win32 as pathWin32 } from 'node:path'
 import { promisify } from 'node:util'
+import { isFubuKingExecutable } from '../shared/fubuking-launch'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess,
@@ -217,6 +220,7 @@ async function getRecognizedForegroundDescendant(
 // Why: returns null (never the fallback) so `getForegroundProcessName` keeps
 // owning the fallback ladder — its wrapper branch answers with the RECOGNIZED
 // process name, which is normalized where node-pty's raw name is not.
+/** 입력: SSH 호스트 스냅샷, 셸 PID와 전경 이름; 반환: 현재 제공자 이름, 관측이 모호하면 null. */
 function getForegroundProcessNameFromProcessTable(
   rows: ProcessTableRow[],
   pid: number,
@@ -235,17 +239,16 @@ function getForegroundProcessNameFromProcessTable(
   const foregroundCandidates = foregroundIsKnown
     ? candidates.filter((candidate) => candidate.stat.includes('+'))
     : candidates
-  const inspectionCandidates =
-    fallbackProcess && isAgentForegroundWrapperProcess(fallbackProcess)
-      ? foregroundCandidates.filter((candidate) =>
-          isExpectedAgentProcess(getFirstCommandToken(candidate.command), fallbackProcess)
-        )
-      : foregroundCandidates
-  if (
+  const inspectSingleWrapper =
     fallbackProcess &&
     isAgentForegroundWrapperProcess(fallbackProcess) &&
-    inspectionCandidates.length !== 1
-  ) {
+    !isFubuKingExecutable(fallbackProcess)
+  const inspectionCandidates = inspectSingleWrapper
+    ? foregroundCandidates.filter((candidate) =>
+        isExpectedAgentProcess(getFirstCommandToken(candidate.command), fallbackProcess)
+      )
+    : foregroundCandidates
+  if (inspectSingleWrapper && inspectionCandidates.length !== 1) {
     return null
   }
   const ancestryCandidates = root ? [{ ...root, depth: 0 }, ...candidates] : candidates

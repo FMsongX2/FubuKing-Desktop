@@ -1,3 +1,6 @@
+// 하나의 호스트 프로세스 스냅샷에서 PTY별 전경 정체성과 점유를 판별한다.
+// 클라이언트 추측이나 인계 런처의 최초 제공자를 현재 상태로 승격하지 않는다.
+import { isFubuKingExecutable } from '../../shared/fubuking-launch'
 import {
   isAgentForegroundWrapperProcess,
   isExpectedAgentProcess
@@ -142,6 +145,7 @@ export async function resolveAgentForegroundProcessesBatch(
   return resolveAgentForegroundProcessesFromIndex(index, requests)
 }
 
+/** 입력: 호스트 스냅샷 색인과 PTY 조회 목록; 반환: 현재 제공자 정체성과 관측 가능한 점유 결과. */
 export function resolveAgentForegroundProcessesFromIndex(
   index: ProcessTableIndex,
   requests: readonly BatchedForegroundProcessRequest[]
@@ -246,7 +250,9 @@ export function resolveAgentForegroundProcessesFromIndex(
     const foregroundCandidates = allCandidates.filter((row) => row.pgid === root.tpgid)
     const fallbackProcess = request.fallbackProcess
     const wrapperFallback =
-      typeof fallbackProcess === 'string' && isAgentForegroundWrapperProcess(fallbackProcess)
+      typeof fallbackProcess === 'string' &&
+      isAgentForegroundWrapperProcess(fallbackProcess) &&
+      !isFubuKingExecutable(fallbackProcess)
     const candidates = wrapperFallback
       ? foregroundCandidates.filter((candidate) =>
           isExpectedAgentProcess(getFirstCommandToken(candidate.command), fallbackProcess)

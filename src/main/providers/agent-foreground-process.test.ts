@@ -1,3 +1,5 @@
+// 로컬 호스트의 전경 프로세스 관측과 에이전트 계보 판별을 검사한다.
+// 실제 프로세스 실행 대신 플랫폼별 스냅샷을 주입한다.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { execFileMock } = vi.hoisted(() => ({

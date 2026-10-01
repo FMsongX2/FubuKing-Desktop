@@ -1,3 +1,26 @@
+# FubuKing Desktop
+
+FubuKing Desktop is an independently maintained fork of [Orca](https://github.com/stablyai/orca) by Lovecast Inc. It preserves Orca's source history and adds a conversation-first desktop interface and optional [FubuKing CLI](https://github.com/FMsongX2/FubuKing) integration for shared memory and agent handoff.
+
+The original MIT license and copyright notice are preserved in [LICENSE](LICENSE). This fork is not an official Orca distribution.
+
+## Fork status
+
+- Sessions grouped by project, a first-message composer, and Chat / Terminal switching are implemented.
+- FubuKing CLI launch integration is available for Claude Code and Codex. Chat synchronization after handoff and reopening closed sessions remain in development.
+- Orca downloads, mobile apps, cloud services, screenshots, and translated READMEs below describe the upstream project. They do not install or represent this fork.
+- Fork-specific binary releases and update feeds are not configured yet. The inherited app updater still targets Orca; it must be separated before distributing FubuKing builds.
+
+## Upstream updates
+
+The `fubuking-upstream-sync.yml` workflow checks Orca's stable desktop releases every six hours. Once enabled, it merges the newest release into a separate branch, runs app typechecks and fork regression tests, builds the renderer, and opens a draft update PR. It preserves our changes through a Git merge and stops on conflicts or failed checks. The fork's workflow files stay unchanged so upstream deployment jobs are not imported. It does not merge the PR or publish an app release.
+
+Automatic execution requires the repository variable `FUBUKING_UPSTREAM_SYNC` to be `true`. Keep the inherited Orca workflows disabled and enable only FubuKing Upstream Sync, with GitHub Actions allowed to create pull requests. Review and merge one update PR before the workflow proposes the next release. An ignored or closed release PR is not recreated automatically.
+
+## Upstream Orca reference
+
+The following documentation is retained from Orca for reference and attribution.
+
 <h1 align="center">
   <a href="https://onOrca.dev"><img src="resources/build/icon.png" alt="Orca" width="64" valign="middle" /></a> Orca
 </h1>

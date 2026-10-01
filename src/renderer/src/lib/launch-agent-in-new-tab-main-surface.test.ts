@@ -1,4 +1,5 @@
-// Real-store coverage: a launch into the floating workspace must leave the main window's tab alone.
+// 실제 스토어로 에이전트 시작 시 창 선택과 최초 메시지 표시를 검사한다.
+// 실행 명령 장전과 표시용 메시지 저장이 각각 한 번만 일어나는지 확인한다.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultSettings } from '../../../shared/constants'
@@ -24,6 +25,7 @@ createStoreCascadesMockApi()
 
 const MAIN_WORKTREE_ID = 'repo1::/path/wt1'
 
+/** 입력: 없음; 반환: 편집기 탭이 선택된 테스트 스토어. */
 function seedMainWindowOnEditor(): ReturnType<typeof createTestStore> {
   const store = createTestStore()
   storeBox.store = store
@@ -44,6 +46,29 @@ function seedMainWindowOnEditor(): ReturnType<typeof createTestStore> {
 describe('launchAgentInNewTab main-window surface', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it('shows an argv launch request immediately without queueing a second submission', async () => {
+    const store = seedMainWindowOnEditor()
+    const queue = vi.fn(store.getState().queueTabStartupCommand)
+    store.setState({ queueTabStartupCommand: queue })
+    const { launchAgentInNewTab } = await import('./launch-agent-in-new-tab')
+    const result = launchAgentInNewTab({
+      agent: 'claude',
+      worktreeId: MAIN_WORKTREE_ID,
+      prompt: 'Inspect the renderer'
+    })
+    if (result?.surface.kind !== 'local-terminal') {
+      throw new Error('Expected a terminal launch')
+    }
+    const tabId = result.surface.tabId
+    expect(queue).toHaveBeenCalledTimes(1)
+    expect(store.getState().pendingStartupByTabId[tabId]?.command).toContain('Inspect the renderer')
+    expect(store.getState().nativeChatLaunchPromptByTabId[tabId]).toMatchObject({
+      agent: 'claude',
+      text: 'Inspect the renderer',
+      createdAt: expect.any(Number)
+    })
   })
 
   it('selects a floating launch in the floating panel without moving the main window', async () => {

@@ -1,4 +1,7 @@
+// 워크트리 생성 진입점을 유지하며 새 대화 요청을 세션 작성 창으로 분기한다.
+// 실제 세션 실행과 작업 폴더 생성은 각 기존 흐름이 소유한다.
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { NewSessionComposerDialog } from './NewSessionComposerDialog'
 import { useAppStore } from '@/store'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import {
@@ -52,7 +55,6 @@ type ComposerModalData = {
   telemetrySource?: WorkspaceCreateTelemetrySource
   contextualTourSource?: string
   setupGuideTourRequestId?: string
-  /** Opened from a New session control (row or its shortcut): label the dialog as a session. */
   asSession?: boolean
 }
 
@@ -65,7 +67,11 @@ export default function NewWorkspaceComposerModal(): React.JSX.Element | null {
     return null
   }
 
-  return <ComposerModalBody modalData={modalData ?? {}} onClose={closeModal} />
+  return modalData?.asSession ? (
+    <NewSessionComposerDialog onClose={closeModal} />
+  ) : (
+    <ComposerModalBody modalData={modalData ?? {}} onClose={closeModal} />
+  )
 }
 
 function ComposerModalBody({
@@ -233,11 +239,9 @@ function QuickTabBody({
   const isFolderWorkspaceTarget = selectedProjectOption?.kind === 'project-group'
   const primaryActionLabel = isFolderWorkspaceTarget
     ? getFolderWorkspacePrimaryActionLabel()
-    : modalData.asSession
-      ? translate('components.newWorkspaceComposer.startSession', 'Start session')
-      : cardProps.selectedRepoIsGit
-        ? translate('auto.components.NewWorkspaceComposerModal.createWorktree', 'Create worktree')
-        : translate('auto.components.NewWorkspaceComposerModal.createWorkspace', 'Create workspace')
+    : cardProps.selectedRepoIsGit
+      ? translate('auto.components.NewWorkspaceComposerModal.createWorktree', 'Create worktree')
+      : translate('auto.components.NewWorkspaceComposerModal.createWorkspace', 'Create workspace')
 
   // Cmd/Ctrl+Enter submits. Escape belongs to the dialog's dismissable layer:
   // the page-style "blur the focused field first" rule assumes the user chose
@@ -284,9 +288,7 @@ function QuickTabBody({
                 'auto.components.sidebar.FolderWorkspaceComposerDialog.title',
                 'Create Folder Workspace'
               )
-            : modalData.asSession
-              ? translate('components.sidebar.newSession', 'New session')
-              : primaryActionLabel}
+            : primaryActionLabel}
         </DialogTitle>
         <DialogDescription className="sr-only">
           {translate(

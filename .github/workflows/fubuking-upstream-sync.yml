@@ -1,0 +1,124 @@
+# Orca 정식 릴리스를 우리 변경과 병합하고 검증한 뒤 초안 PR을 만든다.
+# main 병합과 앱 배포는 수행하지 않으며 저장소 설정으로 명시적으로 활성화한다.
+name: FubuKing Upstream Sync
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: fubuking-upstream-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    if: github.repository == 'FMsongX2/FubuKing-Desktop' && vars.FUBUKING_UPSTREAM_SYNC == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ORCA_BACKGROUND_LAUNCH: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
+      - name: Select stable desktop release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pending="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --json headRefName --jq '[.[] | select(.headRefName | startswith("codex/orca-v"))] | length')"
+          if [ "$pending" != 0 ]; then
+            echo 'An upstream update PR is already awaiting review.'
+            exit 0
+          fi
+          gh api 'repos/stablyai/orca/releases?per_page=100' > "$RUNNER_TEMP/orca-releases.json"
+          tag="$(node --input-type=module - "$RUNNER_TEMP/orca-releases.json" <<'NODE'
+          import { readFileSync } from 'node:fs'
+          import { latestStableDesktopReleaseTag } from './config/scripts/latest-stable-release.mjs'
+          const releases = JSON.parse(readFileSync(process.argv[2], 'utf8'))
+          process.stdout.write(latestStableDesktopReleaseTag(releases.filter((release) => !release.prerelease)))
+          NODE
+          )"
+          if [ -z "$tag" ]; then
+            echo '::error::No stable Orca desktop release found in the latest 100 releases.'
+            exit 1
+          fi
+          branch="codex/orca-$tag"
+          previous="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --state all --json number --jq length)"
+          if [ "$previous" != 0 ]; then
+            echo 'This release already has a PR; review it before retrying manually.'
+            exit 0
+          fi
+          git fetch --no-tags https://github.com/stablyai/orca.git "refs/tags/$tag"
+          revision="$(git rev-parse 'FETCH_HEAD^{commit}')"
+          if git merge-base --is-ancestor "$revision" HEAD; then
+            echo 'The current main branch already contains this release.'
+            exit 0
+          fi
+          printf 'tag=%s\nrevision=%s\nbranch=%s\n' "$tag" "$revision" "$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Merge into update branch
+        if: steps.release.outputs.tag != ''
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_REVISION: ${{ steps.release.outputs.revision }}
+          UPDATE_BRANCH: ${{ steps.release.outputs.branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$UPDATE_BRANCH"
+          git merge --no-ff --no-commit "$RELEASE_REVISION"
+          # 원본의 배포 작업을 가져오지 않고 포크의 워크플로 구성을 유지한다.
+          git restore --source=HEAD --staged --worktree .github/workflows
+          git commit -m "Merge Orca $RELEASE_TAG"
+
+      - uses: ./.github/actions/install-node-dependencies
+        if: steps.release.outputs.tag != ''
+        with:
+          native-runtime: node
+
+      - name: Verify merged app
+        if: steps.release.outputs.tag != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm tc
+          pnpm test src/shared/fubuking-launch.test.ts src/main/providers/agent-foreground-process-fubuking.test.ts src/main/providers/agent-foreground-process.test.ts src/main/providers/agent-foreground-process-batch.test.ts src/renderer/src/components/settings/FubuKingSetting.test.tsx src/renderer/src/lib/session-workspace-options.test.ts src/renderer/src/lib/launch-agent-in-new-tab.test.ts src/renderer/src/lib/launch-agent-in-new-tab-main-surface.test.ts src/renderer/src/components/sidebar/SidebarAgentsList.test.tsx src/renderer/src/components/sidebar/SidebarHeader.test.tsx src/renderer/src/components/sidebar/SidebarToolbar.test.tsx
+          pnpm exec electron-vite build --mode e2e
+
+      - name: Open draft update PR
+        if: steps.release.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          UPDATE_BRANCH: ${{ steps.release.outputs.branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 인증은 검증이 끝난 뒤 이 단계에만 제공한다.
+          git -c credential.helper='!f() { printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f' push origin "HEAD:refs/heads/$UPDATE_BRANCH"
+          {
+            printf '## ELI5\n\nBring Orca %s into FubuKing Desktop while preserving our fork changes.\n\n' "$RELEASE_TAG"
+            printf '## What Changed\n\nMerge the stable upstream release using Git ancestry, keeping FubuKing workflow files unchanged. Conflicts stop the workflow before a branch is published.\n\n'
+            printf '## Why\n\nKeep upstream fixes available for review without replacing our desktop interface or releasing an unreviewed build.\n\n'
+            printf '## Visual Proof\n\nN/A: rendered UI review remains required if this upstream release changes visible behavior.\n\n'
+            printf '## Testing\n\nApp typechecks, fork regression tests, and the renderer build passed on Linux. GUI and other-platform checks remain for review.\n'
+          } > "$RUNNER_TEMP/orca-update-pr.md"
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$UPDATE_BRANCH" --draft --title "Update Orca base to $RELEASE_TAG" --body-file "$RUNNER_TEMP/orca-update-pr.md"

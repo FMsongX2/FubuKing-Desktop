@@ -1,4 +1,7 @@
+// 프로젝트 작업면과 대화 중심 시작 화면을 기존 앱 탐색 상태에 연결한다.
+// 실행 중인 워크벤치와 오른쪽 작업 패널의 수명은 유지한다.
 import { Suspense, useRef } from 'react'
+import { useAppStore } from '@/store'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { translate } from '@/i18n/i18n'
 import Sidebar from '../components/Sidebar'
@@ -13,6 +16,7 @@ import type { AppChromeLayout } from './use-app-chrome-layout'
 import type { FloatingWorkspacePanelState } from './use-floating-workspace-panel'
 
 const Landing = lazy(() => import('../components/Landing'))
+const SessionLanding = lazy(() => import('../components/SessionLanding'))
 const WorktreeCreationPanel = lazy(
   () => import('../components/worktree-creation/WorktreeCreationPanel')
 )
@@ -65,6 +69,7 @@ function WorktreeSidebar({
 }
 
 function ActivePage({ layout }: { layout: AppChromeLayout }): React.JSX.Element {
+  const sessionsSidebar = useAppStore((state) => state.sidebarBody === 'agents')
   const { activeView, activeWorktreeId, activePendingCreationId, creationLayoutActive } = layout
   return (
     <>
@@ -82,7 +87,13 @@ function ActivePage({ layout }: { layout: AppChromeLayout }): React.JSX.Element 
           reserveCollapsedSidebarHeaderSpace={layout.leftTitlebarChromeLayout.isFloating}
         />
       ) : null}
-      {activeView === 'terminal' && !activeWorktreeId && !creationLayoutActive ? <Landing /> : null}
+      {activeView === 'terminal' && !activeWorktreeId && !creationLayoutActive ? (
+        sessionsSidebar ? (
+          <SessionLanding />
+        ) : (
+          <Landing />
+        )
+      ) : null}
     </>
   )
 }

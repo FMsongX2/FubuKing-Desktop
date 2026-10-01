@@ -1,3 +1,5 @@
+// 호스트 스냅샷에서 PTY별 전경 제공자와 프로세스 점유 판별을 검사한다.
+// 인계 부모 프로세스가 현재 제공자를 가리지 않는지 함께 검증한다.
 import { describe, expect, it } from 'vitest'
 import { parseStrictProcessTableRows } from '../../shared/process-table-snapshot'
 import {
@@ -10,6 +12,37 @@ import {
 } from './agent-foreground-process-batch'
 
 describe('batched foreground process correlation', () => {
+  it.each(['zsh', 'fubuking'])(
+    'reads the current provider after a cross-provider handoff with %s in the foreground',
+    (fallbackProcess) => {
+      const rows = parseStrictProcessTableRows(
+        [
+          '100 1 100 101 Ss /bin/zsh',
+          '101 100 101 101 S+ fubuking claude --account default',
+          '102 101 101 101 S+ codex resume current-session'
+        ].join('\n')
+      )
+      expect(
+        resolveAgentForegroundProcessesFromIndex(buildProcessTableIndex(rows), [
+          { rootPid: 100, fallbackProcess }
+        ])
+      ).toMatchObject([{ available: true, processName: 'codex' }])
+    }
+  )
+
+  it('does not report an active agent while the launcher alone is asking for a handoff', () => {
+    const rows = parseStrictProcessTableRows(
+      ['100 1 100 101 Ss /bin/zsh', '101 100 101 101 S+ fubuking claude --account default'].join(
+        '\n'
+      )
+    )
+    expect(
+      resolveAgentForegroundProcessesFromIndex(buildProcessTableIndex(rows), [
+        { rootPid: 100, fallbackProcess: 'fubuking' }
+      ])
+    ).toMatchObject([{ available: true, processName: null, shellOwnsEveryTtyProcessGroup: false }])
+  })
+
   it('uses tpgid/pgid association instead of stat alone', () => {
     const rows = parseStrictProcessTableRows(
       [

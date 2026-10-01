@@ -1,3 +1,5 @@
+// 에이전트 설정 검색 항목을 번역된 카탈로그에서 생성한다.
+// 실행 설정과 에이전트 상태는 변경하지 않는다.
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import {
   getAgentAwakeDescription,
@@ -68,6 +70,14 @@ const AGENT_AWAKE_SEARCH_ENTRY_ID = 'agent-awake'
 const AGENT_RUNTIME_SEARCH_ENTRY_ID = 'agent-runtime'
 
 const getAllAgentsPaneSearchEntries = createLocalizedCatalog(() => [
+  {
+    title: 'FubuKing',
+    description: translate(
+      'components.settings.fubuking.description',
+      'Run Claude Code or Codex with shared repository memory. Usage-limit handoffs ask in the Terminal tab.'
+    ),
+    keywords: ['fubuking', 'memory', 'handoff', 'claude', 'codex']
+  },
   {
     title: translate('auto.components.settings.agents.search.bb9ad95777', 'Agents'),
     description: translate(

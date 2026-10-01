@@ -1,4 +1,7 @@
+// 기존 호스트와 세션 경로로 에이전트 시작 요청을 장전한다.
+// 최초 메시지의 GUI 표시만 보완하며 실행과 전송 소유권은 유지한다.
 import { useAppStore } from '@/store'
+import { isNativeChatSupportedAgent } from '@/lib/native-chat-supported-agent'
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'
 import { planLaunchAgentStartupPrompt } from '@/lib/launch-agent-startup-prompt-plan'
 import { persistAgentLaunchTabOrder } from '@/lib/launch-agent-tab-order'
@@ -275,6 +278,19 @@ function launchAgentInNewTabInternal(args: LaunchAgentInNewTabArgs): LaunchAgent
       request_kind: 'new'
     }
   })
+  if (
+    hasPrompt &&
+    promptDelivery === 'auto-submit' &&
+    pasteDraftAfterLaunch === null &&
+    isNativeChatSupportedAgent(agent)
+  ) {
+    store.seedNativeChatLaunchPrompt({
+      tabId: tab.id,
+      agent,
+      text: trimmedPrompt,
+      createdAt: Date.now()
+    })
+  }
   // Why: fire-and-forget the paste-after-ready delivery so callers keep the synchronous { tabId, startupPlan } signature.
   // Why: safe to call unconditionally — the helper short-circuits (no paste) for native-prefill agents already holding the draft.
   if (hasPrompt && promptDelivery === 'draft' && pasteDraftAfterLaunch === null) {

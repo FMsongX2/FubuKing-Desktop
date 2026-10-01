@@ -1,4 +1,10 @@
+// 대화와 작업 탭의 표시를 모든 워크벤치 레이아웃에서 공유한다.
+// 탭 컨트롤러는 유지하고 세션 화면에서는 제목만 노출한다.
 import React from 'react'
+import { useAppStore } from '@/store'
+import { getTabDragLabel } from './tab-bar-item-model'
+import { findTabAgentEntry } from '../native-chat/native-chat-tab-agent-entry'
+import { isNativeChatTabWideFallbackSafe } from '../native-chat/native-chat-leaf-routing'
 import { useTabStripOverflowNavigation } from './tab-strip-overflow-navigation'
 import { useTabStripDragScrollHandlers } from './tab-strip-drag-scroll'
 import type { TabBarProps } from './tab-bar-props'
@@ -9,6 +15,34 @@ import { useTabBarItemProjection } from './use-tab-bar-item-projection'
 import { renderTabBarSurface } from './tab-bar-surface'
 import { useActiveClientHostedBrowserRowId } from '@/lib/pane-manager/client-hosted-browser-row-state'
 
+/** 입력: 활성 탭과 제목 생성 정책; 반환: 기존 상태 기록에서 읽은 대화 제목. */
+function SessionTitle({
+  item,
+  generated
+}: {
+  item: TabBarItem
+  generated: boolean
+}): React.JSX.Element {
+  const prompt = useAppStore((state) => {
+    if (item.type !== 'terminal') {
+      return ''
+    }
+    const layout = state.terminalLayoutsByTabId[item.data.id]
+    if (layout?.chatLeafId) {
+      return state.agentStatusByPaneKey[`${item.data.id}:${layout.chatLeafId}`]?.prompt ?? ''
+    }
+    return isNativeChatTabWideFallbackSafe(layout)
+      ? (findTabAgentEntry(state.agentStatusByPaneKey, item.data.id)?.prompt ?? '')
+      : ''
+  })
+  const stable =
+    item.type === 'terminal' &&
+    (item.data.customTitle || item.data.aiVaultTitle || (generated && item.data.generatedTitle))
+  const title = stable || !prompt ? getTabDragLabel(item, generated) : prompt.trim().split('\n')[0]
+  return <span className="truncate text-sm font-medium">{title}</span>
+}
+
+/** 입력: 탭 표시와 기존 작업 동작; 반환: 컨트롤러 수명을 유지한 대화 제목 또는 탭 목록. */
 function TabBarInner(props: TabBarProps): React.JSX.Element {
   const {
     worktreeId,
@@ -81,7 +115,17 @@ function TabBarInner(props: TabBarProps): React.JSX.Element {
     groupActiveTabId: props.groupActiveTabId ?? null
   })
 
-  return renderTabBarSurface({
+  const sessionsSidebar = useAppStore((state) => state.sidebarBody === 'agents')
+  const active = itemProjection.orderedItems.find(
+    (item) => item.id === itemProjection.activeVisibleTabId
+  )
+  const activeUnifiedTab = active ? runtime.unifiedTabByVisibleId.get(active.id) : undefined
+  const showSession =
+    sessionsSidebar &&
+    !activeClientHostedBrowserRowId &&
+    (active?.type === 'agent-session' ||
+      (active?.type === 'terminal' && activeUnifiedTab?.viewMode === 'chat'))
+  const surface = renderTabBarSurface({
     props,
     runtime,
     createMenu,
@@ -91,6 +135,18 @@ function TabBarInner(props: TabBarProps): React.JSX.Element {
     activeClientHostedBrowserRowId,
     togglePinned
   })
+  return (
+    <>
+      {showSession && active ? (
+        <div className="flex h-10 min-w-0 flex-1 items-center px-4" data-session-titlebar>
+          <SessionTitle item={active} generated={runtime.generatedTabTitlesEnabled} />
+        </div>
+      ) : null}
+      <div className={showSession ? 'hidden' : 'contents'} aria-hidden={showSession || undefined}>
+        {surface}
+      </div>
+    </>
+  )
 }
 
 export default React.memo(TabBarInner)
