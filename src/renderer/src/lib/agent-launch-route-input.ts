@@ -26,6 +26,7 @@ import type { NativeChatLaunchPromptDelivery } from '@/lib/native-chat-initial-v
 import { isNativeChatTranscriptLocalReadable } from '@/lib/native-chat-transcript-readability'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { readLocalRuntimeCapabilitiesOrUnknown } from '@/runtime/local-runtime-capabilities'
+import { findIndexedFolderWorkspaceOwner } from './worktree-runtime-owner-index'
 
 export type ProspectiveWorkspaceKind = NonNullable<AgentLaunchRoutingInput['workspaceKind']>
 
@@ -45,13 +46,14 @@ export type ProspectiveWorkspace = {
 
 export type AgentLaunchRouteStore = {
   settings?: AgentLaunchRoutingInput['settings']
-  /** Where each workspace's root is, so a cwd naming it is not read as a custom directory. First
-   *  in the intersection so these lookups resolve to the full records. */
-  worktreesByRepo?: AppState['worktreesByRepo']
-  folderWorkspaces?: AppState['folderWorkspaces']
-} & Parameters<typeof getExecutionHostIdForWorktree>[0] &
-  Parameters<typeof getLocalProjectExecutionRuntimeContext>[0] &
-  Parameters<typeof getConnectionIdFromState>[0]
+  worktreesByRepo: AppState['worktreesByRepo']
+  folderWorkspaces: AppState['folderWorkspaces']
+} & Omit<
+  Parameters<typeof getExecutionHostIdForWorktree>[0] &
+    Parameters<typeof getLocalProjectExecutionRuntimeContext>[0] &
+    Parameters<typeof getConnectionIdFromState>[0],
+  'worktreesByRepo' | 'folderWorkspaces'
+>
 
 export type AgentLaunchRouteArgs = {
   agent: TuiAgent
@@ -140,7 +142,11 @@ export function buildAgentLaunchRouteInput(
           ? findWorktreeById(store.worktreesByRepo ?? {}, workspace.worktreeId)?.path
           : undefined,
         resolveFolderWorkspacePath: (folderWorkspaceId) =>
-          store.folderWorkspaces?.find((entry) => entry.id === folderWorkspaceId)?.folderPath
+          findIndexedFolderWorkspaceOwner(
+            store.folderWorkspaces,
+            folderWorkspaceId,
+            parseExecutionHostId(executionHostId)?.id
+          )?.folderPath
       }) || hasExplicitTuiLaunchCommand(store.settings, agent),
     initialSessionOptions: args.initialSessionOptions
   }

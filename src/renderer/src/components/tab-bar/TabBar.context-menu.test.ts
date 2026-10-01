@@ -581,7 +581,13 @@ describe('TabBar context menu wiring', () => {
       preventDefault: vi.fn()
     })
 
-    const root = findChildrenByType(element, 'div')[0]
+    const root = findChildrenByType(element, 'div').find(
+      (node) => node.props['data-native-file-drop-target'] === 'editor'
+    )
+    expect(root).toBeTruthy()
+    if (!root) {
+      throw new Error('Tab strip lifecycle root not rendered')
+    }
     const rootRef = (root.props.ref ?? root.ref) as (node: HTMLDivElement | null) => void
     rootRef(null)
 

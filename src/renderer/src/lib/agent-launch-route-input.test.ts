@@ -359,6 +359,25 @@ describe('a cwd that names the workspace root', () => {
       folderWorkspaces: [{ id: 'folder-1', folderPath: '/srv/notes' }]
     }) as unknown as AgentLaunchRouteStore
 
+  it('compares a mirrored folder cwd with the selected host root', () => {
+    const state = withRoot()
+    const folder = state.folderWorkspaces?.[0]
+    if (!folder) {
+      throw new Error('Folder fixture missing')
+    }
+    state.folderWorkspaces = [
+      { ...folder, executionHostId: 'runtime:other', folderPath: '/foreign/notes' },
+      { ...folder, executionHostId: 'local', folderPath: '/srv/notes' }
+    ]
+    expect(
+      buildAgentLaunchRouteInput(state, {
+        agent: 'codex',
+        workspace: { kind: 'folder', worktreeId: 'folder:folder-1' },
+        tuiCustomization: { cwd: '/srv/notes' }
+      }).requiresTuiLaunchCommand
+    ).toBe(false)
+  })
+
   it.each(['/repo/app', '/repo/app/', '.'])(
     'routes structured under the chat default for cwd %s',
     (cwd) => {

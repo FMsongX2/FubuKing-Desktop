@@ -105,11 +105,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_REVISION: ${{ steps.release.outputs.revision }}
           UPDATE_BRANCH: ${{ steps.release.outputs.branch }}
         shell: bash
         run: |
           set -euo pipefail
-          git -c credential.helper='!f() { printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f' push origin "HEAD:refs/heads/$UPDATE_BRANCH"
+          existing="$(git ls-remote origin "refs/heads/$UPDATE_BRANCH")"
+          if [ -n "$existing" ]; then
+            git fetch --no-tags origin "refs/heads/$UPDATE_BRANCH"
+            if ! git merge-base --is-ancestor "$RELEASE_REVISION" FETCH_HEAD ||
+              [ "$(git rev-parse 'HEAD^{tree}')" != "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+              echo '::error::The existing update branch differs from this validated release. It was left unchanged.'
+              exit 1
+            fi
+          else
+            git -c credential.helper='!f() { printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f' push origin "HEAD:refs/heads/$UPDATE_BRANCH"
+          fi
           {
             printf '## ELI5\n\nBring Orca %s into FubuKing Desktop while preserving our fork changes.\n\n' "$RELEASE_TAG"
             printf '## What Changed\n\nMerge the stable upstream release using Git ancestry, keeping FubuKing workflow files unchanged. Conflicts stop the workflow before a branch is published.\n\n'

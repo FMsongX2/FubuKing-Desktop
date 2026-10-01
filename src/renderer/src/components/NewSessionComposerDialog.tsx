@@ -7,15 +7,19 @@ import { translate } from '@/i18n/i18n'
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import { selectExecutionHostDisplayLabel } from '@/lib/execution-host-display-label'
 import { launchAgentInNewTab } from '@/lib/launch-agent-in-new-tab'
-import { buildSessionWorkspaceOptions } from '@/lib/session-workspace-options'
+import {
+  buildSessionWorkspaceOptions,
+  getSessionWorkspaceDetectionTarget
+} from '@/lib/session-workspace-options'
+import {
+  getLocalAgentPreflightContext,
+  localPreflightContextKey
+} from '@/lib/local-preflight-context'
 import {
   pickQuickWorkspaceAgent,
   resolveQuickWorkspaceAgentSelection
 } from '@/lib/quick-workspace-agent-selection'
-import {
-  useAgentDetectionTargetForWorktree,
-  parseAgentDetectionTargetKey
-} from '@/hooks/useAgentDetectionTarget'
+import { useAgentDetectionTargetForWorktree } from '@/hooks/useAgentDetectionTarget'
 import { useDetectedAgents } from '@/hooks/useDetectedAgents'
 import { isTuiAgentEnabled } from '../../../shared/tui-agent-selection'
 import type { TuiAgent } from '../../../shared/tui-agent'
@@ -49,11 +53,12 @@ export function NewSessionComposerDialog({ onClose }: { onClose: () => void }): 
   const selected =
     selectedValue === null ? options[0] : options.find((option) => option.value === selectedValue)
   const inheritedTarget = useAgentDetectionTargetForWorktree(selected?.worktreeId ?? null)
-  const target = selected
-    ? selected.executionHostId
-      ? parseAgentDetectionTargetKey(selected.executionHostId)
-      : inheritedTarget
-    : undefined
+  const localContextKey = useAppStore((state) =>
+    localPreflightContextKey(
+      getLocalAgentPreflightContext(state, undefined, undefined, selected?.worktreeId)
+    )
+  )
+  const target = getSessionWorkspaceDetectionTarget(selected, inheritedTarget, localContextKey)
   const { detectedIds, isLoading } = useDetectedAgents(target)
   const [agentOverride, setAgentOverride] = useState<TuiAgent | null | undefined>(undefined)
   const preferred = pickQuickWorkspaceAgent(

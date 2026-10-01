@@ -73,6 +73,15 @@ test('enables FubuKing in Settings and starts the provider with memory inside th
   await expect(control).not.toBeChecked()
   await control.click()
   await expect(control).toBeChecked()
+  await orcaPage.reload()
+  await waitForSessionReady(orcaPage)
+  await waitForActiveWorktree(orcaPage)
+  await orcaPage.evaluate(() => {
+    const state = window.__store!.getState()
+    state.openSettingsTarget({ pane: 'agents', repoId: null })
+    state.openSettingsPage()
+  })
+  await expect(control).toBeChecked()
   await orcaPage.screenshot({ path: test.info().outputPath('fubuking-settings.png') })
   await orcaPage.evaluate(
     async (prefix) => {

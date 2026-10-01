@@ -14,15 +14,27 @@ type FubuKingSettingProps = {
   updateSettings: (updates: Partial<GlobalSettings>) => void | Promise<void>
 }
 
+function createSettingsWriteQueue(): (write: () => Promise<void>) => Promise<void> {
+  let pending: Promise<void> = Promise.resolve()
+  return (write) => {
+    pending = pending.catch(() => {}).then(write)
+    return pending
+  }
+}
+
+const enqueueSettingsWrite = createSettingsWriteQueue()
+
 export function FubuKingSetting({ settings, updateSettings }: FubuKingSettingProps) {
   const overrides = settings.agentCmdOverrides ?? {}
 
   function toggleAgent(agent: FubuKingAgent, enabled: boolean): void {
-    const current = useAppStore.getState().settings?.agentCmdOverrides ?? overrides
-    const next = updateFubuKingLaunchCommands(current, agent, enabled)
-    if (next !== current) {
-      void updateSettings({ agentCmdOverrides: next })
-    }
+    void enqueueSettingsWrite(async () => {
+      const current = useAppStore.getState().settings?.agentCmdOverrides ?? overrides
+      const next = updateFubuKingLaunchCommands(current, agent, enabled)
+      if (next !== current) {
+        await updateSettings({ agentCmdOverrides: next })
+      }
+    }).catch((error) => console.error('FubuKing settings update failed', error))
   }
 
   return (
