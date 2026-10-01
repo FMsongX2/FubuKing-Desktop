@@ -1,5 +1,3 @@
-// FubuKing 설정 스위치의 사용자 지정 명령 보호와 실제 설정 갱신을 검사한다.
-// 앱 저장소를 메모리에서만 구성하고 로그인이나 파일 쓰기는 수행하지 않는다.
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'

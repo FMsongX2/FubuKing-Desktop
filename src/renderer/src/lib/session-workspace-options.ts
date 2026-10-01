@@ -1,5 +1,3 @@
-// 새 대화에서 선택할 기존 프로젝트 폴더를 표시용 목록으로 만든다.
-// 실행 호스트 정체성을 보존하며 폴더나 브랜치를 생성하지 않는다.
 import type { Repo } from '../../../shared/repo-types'
 import type { Worktree } from '../../../shared/worktree/types'
 import type { FolderWorkspace } from '../../../shared/folder-workspace-types'
@@ -29,7 +27,6 @@ type SessionWorkspaceCatalog = {
   >[]
 }
 
-/** 입력: 호스트별 프로젝트 목록; 반환: 보관되지 않은 기존 작업 폴더와 실행 호스트가 묶인 선택지. */
 export function buildSessionWorkspaceOptions(
   catalog: SessionWorkspaceCatalog
 ): SessionWorkspaceOption[] {

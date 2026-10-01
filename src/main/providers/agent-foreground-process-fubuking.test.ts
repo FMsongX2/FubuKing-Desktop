@@ -1,5 +1,3 @@
-// FubuKing 인계 후 Windows 전경 프로세스가 현재 자식 에이전트를 따르는지 검사한다.
-// 실제 프로세스 실행 없이 네이티브 프로세스 테이블 경계를 주입한다.
 import { afterEach, describe, expect, it } from 'vitest'
 import { resetProcessTableSnapshotForTests } from '../../shared/process-table-snapshot-reader'
 import { __setWindowsProcessTreeLoaderForTests } from '../windows/windows-process-table'

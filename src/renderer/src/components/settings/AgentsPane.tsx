@@ -1,5 +1,3 @@
-// 에이전트 실행·권한·가용성 설정을 기존 설정 저장소에 연결한다.
-// 계정 자격 증명과 실행 상태는 이 화면에서 소유하지 않는다.
 import { useMemo } from 'react'
 import { Info } from 'lucide-react'
 import type { GlobalSettings } from '../../../../shared/global-settings-types'
@@ -141,7 +139,6 @@ export function AgentPermissionsSetting({
   )
 }
 
-/** 입력: 에이전트 설정과 갱신 함수; 반환: 실행 호스트의 설정을 편집하는 에이전트 화면. */
 export function AgentsPane({
   settings,
   updateSettings,

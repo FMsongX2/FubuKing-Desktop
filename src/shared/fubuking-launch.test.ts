@@ -1,5 +1,3 @@
-// FubuKing 진입 명령이 기존 시작·재개 계약과 제공자 판별을 유지하는지 검사한다.
-// 실제 로그인이나 사용자 프로필은 사용하지 않는다.
 import { describe, expect, it } from 'vitest'
 import { getFubuKingLaunchCommand, updateFubuKingLaunchCommands } from './fubuking-launch'
 import {
@@ -9,7 +7,6 @@ import {
 import { buildAgentResumeStartupPlan, buildAgentStartupPlan } from './tui-agent-startup'
 import { tokenizeStartupCommand, type AgentStartupShell } from './tui-agent-startup-shell'
 
-/** 입력: 실행 명령과 셸; 반환: 셸에 전달되는 실제 인자 토큰, 잘못된 명령이면 테스트 실패. */
 function commandTokens(command: string, shell: AgentStartupShell): string[] {
   const parsed = tokenizeStartupCommand(command, shell)
   expect(parsed.ok).toBe(true)

@@ -1,5 +1,3 @@
-// 새 대화 대상이 기존 폴더와 해당 실행 호스트를 유지하는지 검사한다.
-// 저장소 생성이나 로그인 없이 표시용 입력만 사용한다.
 import { describe, expect, it } from 'vitest'
 import { buildSessionWorkspaceOptions } from './session-workspace-options'
 

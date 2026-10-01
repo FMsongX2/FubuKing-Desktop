@@ -1,5 +1,3 @@
-// 기존 에이전트 기록을 프로젝트별 세션 목록과 검색으로 표시한다.
-// 실행 상태를 새로 만들지 않고 기존 기록과 탐색 동작을 재사용한다.
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'

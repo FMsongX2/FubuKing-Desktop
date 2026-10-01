@@ -1,5 +1,3 @@
-// 세션 사이드바의 새 대화와 검색을 우선 배치한다.
-// 부가 화면은 기존 탐색 액션을 메뉴에서 호출한다.
 import {
   Search,
   MoreHorizontal,
@@ -21,14 +19,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import SidebarNewSessionButton from './SidebarNewSessionButton'
 
-/** 입력: 없음; 반환: 새 세션·대화 검색·부가 기능 메뉴로 구성된 탐색 영역. */
 export function SessionSidebarNav(): React.JSX.Element {
   useTranslation()
   const showTasks = useAppStore((state) => state.settings?.showTasksButton !== false)
   const showAutomations = useAppStore((state) => state.settings?.showAutomationsButton !== false)
   const showMobile = useAppStore((state) => state.settings?.showMobileButton !== false)
 
-  /** 입력: 없음; 반환: 없음, 세션 필터를 열고 현재 창의 검색 입력에 초점을 둔다. */
   function search(): void {
     useAppStore.getState().setAgentsShowSearch(true)
     requestAnimationFrame(() =>

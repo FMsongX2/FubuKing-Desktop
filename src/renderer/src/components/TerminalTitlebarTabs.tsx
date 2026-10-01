@@ -1,5 +1,3 @@
-// 공유 탭 컴포넌트를 기존 제목 표시줄 포털에 연결한다.
-// 탭 표시 정책과 컨트롤러 수명은 공유 컴포넌트가 소유한다.
 import { createPortal } from 'react-dom'
 import type { TerminalTab } from '../../../shared/terminal-tab-types'
 import { useAppStore } from '../store'

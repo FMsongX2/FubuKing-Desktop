@@ -1,5 +1,3 @@
-// 호스트 스냅샷에서 PTY별 전경 제공자와 프로세스 점유 판별을 검사한다.
-// 인계 부모 프로세스가 현재 제공자를 가리지 않는지 함께 검증한다.
 import { describe, expect, it } from 'vitest'
 import { parseStrictProcessTableRows } from '../../shared/process-table-snapshot'
 import {

@@ -1,5 +1,3 @@
-// 대화와 작업 탭의 표시를 모든 워크벤치 레이아웃에서 공유한다.
-// 탭 컨트롤러는 유지하고 세션 화면에서는 제목만 노출한다.
 import React from 'react'
 import { useAppStore } from '@/store'
 import { getTabDragLabel } from './tab-bar-item-model'
@@ -15,7 +13,6 @@ import { useTabBarItemProjection } from './use-tab-bar-item-projection'
 import { renderTabBarSurface } from './tab-bar-surface'
 import { useActiveClientHostedBrowserRowId } from '@/lib/pane-manager/client-hosted-browser-row-state'
 
-/** 입력: 활성 탭과 제목 생성 정책; 반환: 기존 상태 기록에서 읽은 대화 제목. */
 function SessionTitle({
   item,
   generated
@@ -42,7 +39,6 @@ function SessionTitle({
   return <span className="truncate text-sm font-medium">{title}</span>
 }
 
-/** 입력: 탭 표시와 기존 작업 동작; 반환: 컨트롤러 수명을 유지한 대화 제목 또는 탭 목록. */
 function TabBarInner(props: TabBarProps): React.JSX.Element {
   const {
     worktreeId,

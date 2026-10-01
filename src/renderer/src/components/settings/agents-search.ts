@@ -1,5 +1,3 @@
-// 에이전트 설정 검색 항목을 번역된 카탈로그에서 생성한다.
-// 실행 설정과 에이전트 상태는 변경하지 않는다.
 import { getAgentCatalog } from '@/lib/agent-catalog'
 import {
   getAgentAwakeDescription,

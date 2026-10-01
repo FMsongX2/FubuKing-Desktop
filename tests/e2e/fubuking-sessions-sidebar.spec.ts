@@ -1,6 +1,3 @@
-// 세션 중심 탐색과 새 대화 작성, 채팅·터미널 전환을 실제 렌더러에서 검사한다.
-// 실행은 격리된 프로필의 가짜 제공자만 사용한다.
-
 import { randomUUID } from 'node:crypto'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'

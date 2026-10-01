@@ -1,5 +1,3 @@
-// 기존 호스트와 세션 경로로 에이전트 시작 요청을 장전한다.
-// 최초 메시지의 GUI 표시만 보완하며 실행과 전송 소유권은 유지한다.
 import { useAppStore } from '@/store'
 import { isNativeChatSupportedAgent } from '@/lib/native-chat-supported-agent'
 import type { AgentStartupPlan } from '@/lib/tui-agent-startup'

@@ -1,5 +1,3 @@
-// 기존 작업 도구와 설정 진입점을 사이드바 하단에 유지한다.
-// 작업 폴더 전용 이전 안내는 해당 탐색 모드에서만 표시한다.
 import React from 'react'
 import { Kanban } from 'lucide-react'
 import { useTranslation } from 'react-i18next'

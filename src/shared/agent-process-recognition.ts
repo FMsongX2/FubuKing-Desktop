@@ -1,5 +1,3 @@
-// 실행 파일과 명령행에서 에이전트 정체성을 판별한다.
-// 래퍼 프로세스와 실제 제공자를 구분하며 상태 수명은 변경하지 않는다.
 import { getTuiAgentDetectCommands, TUI_AGENT_CONFIG } from './tui-agent-config'
 import { getFubuKingAgentIndex } from './fubuking-launch'
 import { EXACT_NODE_ENTRYPOINT_IDENTITIES } from './agent-node-entrypoint-identities'
@@ -177,7 +175,6 @@ export function recognizeAgentProcess(
   return recognizedAgentForProcess(normalized)
 }
 
-/** 입력: 명령행, 단발 실행 포함 여부와 런처 제외 여부; 반환: 제공자 정체성, 판별할 수 없으면 null. */
 export function recognizeAgentProcessFromCommandLine(
   commandLine: string | null | undefined,
   // Why: TUI consumers (status hooks, shell shadows) filter out headless

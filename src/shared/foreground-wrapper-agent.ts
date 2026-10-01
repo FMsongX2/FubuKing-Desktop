@@ -1,5 +1,3 @@
-// 실제 에이전트를 같은 정체성 그룹의 소유 프로세스와 연결한다.
-// 제공자를 교체하는 런처는 에이전트 수명의 기준으로 삼지 않는다.
 import {
   recognizeAgentProcess,
   recognizeAgentProcessFromCommandLine,
@@ -45,7 +43,6 @@ export function resolveOuterWrapperForegroundProcess(
  * outer wrapper's name to the embedded leaf's pid reads the leaf's exit as
  * the wrapper's.
  */
-/** 입력: 실제 제공자와 호스트 계보; 반환: 같은 정체성 그룹의 소유 프로세스 이름과 수명 기준 PID. */
 export function resolveOuterWrapperForegroundIdentity(
   winner: RecognizedAgentProcess,
   winnerCandidate: ForegroundAgentCandidate,

@@ -1,5 +1,4 @@
-// 실제 스토어로 에이전트 시작 시 창 선택과 최초 메시지 표시를 검사한다.
-// 실행 명령 장전과 표시용 메시지 저장이 각각 한 번만 일어나는지 확인한다.
+// Real-store coverage: a launch into the floating workspace must leave the main window's tab alone.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultSettings } from '../../../shared/constants'
@@ -25,7 +24,6 @@ createStoreCascadesMockApi()
 
 const MAIN_WORKTREE_ID = 'repo1::/path/wt1'
 
-/** 입력: 없음; 반환: 편집기 탭이 선택된 테스트 스토어. */
 function seedMainWindowOnEditor(): ReturnType<typeof createTestStore> {
   const store = createTestStore()
   storeBox.store = store

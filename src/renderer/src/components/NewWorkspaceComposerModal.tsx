@@ -1,5 +1,3 @@
-// 워크트리 생성 진입점을 유지하며 새 대화 요청을 세션 작성 창으로 분기한다.
-// 실제 세션 실행과 작업 폴더 생성은 각 기존 흐름이 소유한다.
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NewSessionComposerDialog } from './NewSessionComposerDialog'
 import { useAppStore } from '@/store'

@@ -1,5 +1,3 @@
-// 프로젝트 작업면과 대화 중심 시작 화면을 기존 앱 탐색 상태에 연결한다.
-// 실행 중인 워크벤치와 오른쪽 작업 패널의 수명은 유지한다.
 import { Suspense, useRef } from 'react'
 import { useAppStore } from '@/store'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'

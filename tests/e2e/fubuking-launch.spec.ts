@@ -1,5 +1,3 @@
-// 격리된 Desktop에서 설정 스위치부터 실제 FubuKing CLI와 가짜 제공자 실행까지 검사한다.
-// 실제 로그인 대신 임시 홈과 가짜 Claude를 사용한다.
 import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -38,7 +36,6 @@ const launchEnv = getGoldenStubAgentLaunchEnv()
 launchEnv.PATH = [directory, launchEnv.PATH ?? process.env.PATH ?? ''].join(path.delimiter)
 test.use({ upstreamUiDefaults: false, launchEnv })
 
-/** 입력: 없음; 반환: 없음, 이 spec이 생성한 임시 제공자와 실행 기록만 제거한다. */
 test.afterAll(() => rmSync(directory, { recursive: true, force: true }))
 
 test('enables FubuKing in Settings and starts the provider with memory inside the same terminal', async ({
@@ -77,7 +74,6 @@ test('enables FubuKing in Settings and starts the provider with memory inside th
   await control.click()
   await expect(control).toBeChecked()
   await orcaPage.screenshot({ path: test.info().outputPath('fubuking-settings.png') })
-  // 제공자 검색 경로는 로그인 셸을 통과한 뒤 실행 환경에 적용한다.
   await orcaPage.evaluate(
     async (prefix) => {
       const state = window.__store!.getState()

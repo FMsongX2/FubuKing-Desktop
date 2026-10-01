@@ -1,5 +1,3 @@
-// Windows 호스트가 관측한 프로세스 계보에서 PTY 에이전트와 수명 기준 PID를 판별한다.
-// 인계 런처는 현재 제공자로 간주하지 않는다.
 import { isFubuKingExecutable } from '../../shared/fubuking-launch'
 import {
   isAgentForegroundWrapperProcess,
@@ -129,7 +127,6 @@ export async function resolveWindowsAgentForegroundProcessWithAvailability(
   }
 }
 
-/** 입력: Windows 후보, 전경 이름과 작업 경로; 반환: 관측 후보에 실제 제공자가 존재하는지 여부. */
 function windowsCandidatesContainRecognizedAgent(
   candidates: readonly WindowsProcessCandidate[],
   fallbackProcess: string,
@@ -147,7 +144,6 @@ function windowsCandidatesContainRecognizedAgent(
     )
 }
 
-/** 입력: Windows 후보, 전경 이름과 작업 경로; 반환: 현재 제공자와 수명 기준 PID, 모호하면 이름이 null. */
 function resolveWindowsForegroundIdentity(
   candidates: readonly WindowsProcessCandidate[],
   fallbackProcess: string,
@@ -333,7 +329,6 @@ function commandLineContainsPath(haystack: string, contextPath: string): boolean
   return false
 }
 
-/** 입력: 호스트가 관측한 프로세스 행; 반환: 인계 런처를 제외한 제공자 정체성 또는 null. */
 function recognizeWindowsProcessCandidate(
   candidate: WindowsProcessRow
 ): RecognizedAgentProcess | null {

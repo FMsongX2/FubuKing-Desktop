@@ -1,5 +1,3 @@
-// 호스트가 관측한 전경 프로세스 중 실제 에이전트 계보를 선택한다.
-// 인계 런처의 오래된 명령행을 현재 제공자 정체성으로 사용하지 않는다.
 import {
   recognizeAgentProcessFromCommandLine,
   type RecognizedAgentProcess
@@ -22,7 +20,6 @@ export type SelectedForegroundProcess = {
  * Select a foreground agent without letting a vendor helper steal an outer
  * agent's identity when both names occur in one process lineage.
  */
-/** 입력: 전경 후보와 호스트 계보; 반환: 런처를 제외한 에이전트 후보, 계보가 모호하면 null. */
 export function selectForegroundProcessCandidate(
   candidates: readonly ForegroundProcessCandidate[],
   ancestryCandidates: readonly ForegroundProcessCandidate[] = candidates

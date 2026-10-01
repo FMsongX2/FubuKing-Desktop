@@ -1,5 +1,3 @@
-// 세션과 작업 폴더 탐색 모드의 제목과 전환 동작을 표시한다.
-// 선택과 필터 상태는 기존 저장소가 소유한다.
 import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/store'

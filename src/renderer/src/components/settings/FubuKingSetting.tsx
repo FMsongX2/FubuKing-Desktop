@@ -1,5 +1,3 @@
-// FubuKing 실행을 제공자별로 켜고 끄는 설정을 표시한다.
-// 기존 명령 설정만 갱신하며 사용자 지정 명령과 실행 중 세션은 보존한다.
 import type { GlobalSettings } from '../../../../shared/global-settings-types'
 import {
   FUBUKING_AGENTS,
@@ -16,11 +14,9 @@ type FubuKingSettingProps = {
   updateSettings: (updates: Partial<GlobalSettings>) => void | Promise<void>
 }
 
-/** 입력: 현재 설정과 갱신 함수; 반환: FubuKing 설치 안내와 제공자별 실행 스위치. */
 export function FubuKingSetting({ settings, updateSettings }: FubuKingSettingProps) {
   const overrides = settings.agentCmdOverrides ?? {}
 
-  /** 입력: 제공자와 활성화 여부; 반환: 없음, 최신 명령 설정에 해당 제공자 변경만 반영한다. */
   function toggleAgent(agent: FubuKingAgent, enabled: boolean): void {
     const current = useAppStore.getState().settings?.agentCmdOverrides ?? overrides
     const next = updateFubuKingLaunchCommands(current, agent, enabled)

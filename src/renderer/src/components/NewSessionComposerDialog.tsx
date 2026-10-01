@@ -1,5 +1,3 @@
-// 기존 프로젝트에서 첫 메시지로 새 에이전트 대화를 시작한다.
-// 실행과 상태 수명은 기존 세션 런처와 호스트가 소유한다.
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ArrowUp, FolderPlus } from 'lucide-react'
@@ -28,7 +26,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import AgentCombobox from './agent/AgentCombobox'
 import AgentSettingsDialog from './agent/AgentSettingsDialog'
 
-/** 입력: 닫기 함수; 반환: 기존 작업 폴더와 에이전트를 선택하는 새 대화 작성 창. */
 export function NewSessionComposerDialog({ onClose }: { onClose: () => void }): React.JSX.Element {
   useTranslation()
   const repos = useAppStore((state) => state.repos)
@@ -83,7 +80,6 @@ export function NewSessionComposerDialog({ onClose }: { onClose: () => void }): 
     selected && agent && prompt.trim() && target && detectedIds && !isLoading && !submitting
   )
 
-  /** 입력: 없음; 반환: 없음, 선택한 호스트의 기존 폴더에 첫 메시지와 함께 새 세션을 장전한다. */
   function submit(): void {
     if (!canSubmit || !selected || !agent || submittingRef.current) {
       return
@@ -128,7 +124,6 @@ export function NewSessionComposerDialog({ onClose }: { onClose: () => void }): 
     }
   }
 
-  /** 입력: 없음; 반환: 없음, 기존 프로젝트 추가 흐름으로 전환한다. */
   function addProject(): void {
     useAppStore.getState().openModal('add-repo')
   }

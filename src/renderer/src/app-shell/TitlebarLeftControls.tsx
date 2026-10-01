@@ -1,5 +1,3 @@
-// 제목 표시줄의 제품명과 기존 탐색 동작을 연결한다.
-// 창과 작업 폴더 탐색 상태는 기존 저장소가 소유한다.
 import { ArrowLeft, ArrowRight, MoreHorizontal, PanelLeft } from 'lucide-react'
 import logo from '../../../../resources/logo.svg'
 import { translate } from '@/i18n/i18n'

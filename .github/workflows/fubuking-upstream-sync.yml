@@ -1,5 +1,3 @@
-# Orca 정식 릴리스를 우리 변경과 병합하고 검증한 뒤 초안 PR을 만든다.
-# main 병합과 앱 배포는 수행하지 않으며 저장소 설정으로 명시적으로 활성화한다.
 name: FubuKing Upstream Sync
 
 on:
@@ -85,7 +83,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$UPDATE_BRANCH"
           git merge --no-ff --no-commit "$RELEASE_REVISION"
-          # 원본의 배포 작업을 가져오지 않고 포크의 워크플로 구성을 유지한다.
           git restore --source=HEAD --staged --worktree .github/workflows
           git commit -m "Merge Orca $RELEASE_TAG"
 
@@ -112,7 +109,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # 인증은 검증이 끝난 뒤 이 단계에만 제공한다.
           git -c credential.helper='!f() { printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f' push origin "HEAD:refs/heads/$UPDATE_BRANCH"
           {
             printf '## ELI5\n\nBring Orca %s into FubuKing Desktop while preserving our fork changes.\n\n' "$RELEASE_TAG"

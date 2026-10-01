@@ -1,5 +1,3 @@
-// 저장된 실행 명령에 제공자 세션의 재개 인자를 결합한다.
-// 오래된 Claude 선택자를 제거하고 명령의 나머지 바이트를 보존한다.
 import type { ResumableTuiAgent } from './agent-session-resume'
 import { getFubuKingAgentIndex } from './fubuking-launch'
 import {
@@ -32,7 +30,6 @@ function isClaudeExecutableToken(token: string): boolean {
  * wrapper's `--`, behind PowerShell's `&` call operator, or preceded solely by
  * NAME=value assignments — so an argument that merely ends in /claude (an ssh
  * key, a project dir) can never be mistaken for the executable. */
-/** 입력: 명령 토큰과 셸; 반환: Claude 실행 인자 시작 위치, 판별할 수 없으면 -1. */
 function findClaudeExecutableIndex(tokens: readonly string[], shell: AgentStartupShell): number {
   const fubukingAgentIndex = getFubuKingAgentIndex(tokens)
   if (fubukingAgentIndex !== null && tokens[fubukingAgentIndex] === 'claude') {
